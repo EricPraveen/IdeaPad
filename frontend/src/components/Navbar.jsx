@@ -13,7 +13,7 @@ export default function Navbar() {
     return (
         <nav className="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center transition-all">
             <Link to="/" className="text-2xl font-extrabold text-gradient flex items-center gap-2">
-                <span className="text-3xl">✨</span> IdeaPad
+                <img src="/favicon.png" alt="IdeaPad" className="w-8 h-8 object-contain rounded-md" /> IdeaPad
             </Link>
 
             <div className="flex items-center gap-4">
