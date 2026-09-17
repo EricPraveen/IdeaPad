@@ -11,12 +11,19 @@ export default function GenreFilter({ selected, onSelect }) {
                 <button
                     key={genre}
                     onClick={() => onSelect(genre)}
-                    className={`px-5 py-2 rounded-full text-sm font-medium backdrop-blur-sm transition-all duration-300
-                        ${selected === genre
-                            ? 'bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white shadow-md shadow-indigo-500/20 border-transparent'
-                            : 'bg-slate-800/50 text-slate-300 border border-white/10 hover:bg-slate-700/80 hover:border-indigo-400/50 hover:text-white hover:shadow-sm'
-                        }`}>
-                    {genre}
+                    className="genre-label transition-all duration-200"
+                    style={{
+                        fontFamily: "'Special Elite', monospace",
+                        color: selected === genre ? '#FAF6EE' : '#8B5A2B',
+                        background: selected === genre ? '#7A2E2E' : 'transparent',
+                        borderColor: selected === genre ? '#7A2E2E' : '#8B5A2B',
+                        transform: selected === genre ? 'none' : undefined,
+                        padding: '0.25rem 0.85rem',
+                        fontSize: '0.68rem',
+                        letterSpacing: '0.14em',
+                    }}
+                >
+                    {genre.toUpperCase()}
                 </button>
             ))}
         </div>

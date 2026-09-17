@@ -1,54 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import BlogCard from '../components/BlogCard'
 import { getUserById } from '../services/userService'
 import { getPostsByUserId } from '../services/postService'
 import { useAuth } from '../context/AuthContext'
-import { getGenreColor } from '../utils/genreColors'
-
-const countryFlags = {
-    'Afghanistan': '🇦🇫', 'Albania': '🇦🇱', 'Algeria': '🇩🇿', 'Andorra': '🇦🇩', 'Angola': '🇦🇴',
-    'Antigua and Barbuda': '🇦🇬', 'Argentina': '🇦🇷', 'Armenia': '🇦🇲', 'Australia': '🇦🇺', 'Austria': '🇦🇹',
-    'Azerbaijan': '🇦🇿', 'Bahamas': '🇧🇸', 'Bahrain': '🇧🇭', 'Bangladesh': '🇧🇩', 'Barbados': '🇧🇧',
-    'Belarus': '🇧🇾', 'Belgium': '🇧🇪', 'Belize': '🇧🇿', 'Benin': '🇧🇯', 'Bhutan': '🇧🇹',
-    'Bolivia': '🇧🇴', 'Bosnia and Herzegovina': '🇧🇦', 'Botswana': '🇧🇼', 'Brazil': '🇧🇷', 'Brunei': '🇧🇳',
-    'Bulgaria': '🇧🇬', 'Burkina Faso': '🇧🇫', 'Burundi': '🇧🇮', 'Cabo Verde': '🇨🇻', 'Cambodia': '🇰🇭',
-    'Cameroon': '🇨🇲', 'Canada': '🇨🇦', 'Central African Republic': '🇨🇫', 'Chad': '🇹🇩', 'Chile': '🇨🇱',
-    'China': '🇨🇳', 'Colombia': '🇨🇴', 'Comoros': '🇰🇲', 'Congo (Congo-Brazzaville)': '🇨🇬', 'Costa Rica': '🇨🇷',
-    'Croatia': '🇭🇷', 'Cuba': '🇨🇺', 'Cyprus': '🇨🇾', 'Czechia': '🇨🇿', 'Democratic Republic of the Congo': '🇨🇩',
-    'Denmark': '🇩🇰', 'Djibouti': '🇩🇯', 'Dominica': '🇩🇲', 'Dominican Republic': '🇩🇴', 'Ecuador': '🇪🇨',
-    'Egypt': '🇪🇬', 'El Salvador': '🇸🇻', 'Equatorial Guinea': '🇬🇶', 'Eritrea': '🇪🇷', 'Estonia': '🇪🇪',
-    'Eswatini': '🇸🇿', 'Ethiopia': '🇪🇹', 'Fiji': '🇫🇯', 'Finland': '🇫🇮', 'France': '🇫🇷',
-    'Gabon': '🇬🇦', 'Gambia': '🇬🇲', 'Georgia': '🇬🇪', 'Germany': '🇩🇪', 'Ghana': '🇬🇭',
-    'Greece': '🇬🇷', 'Grenada': '🇬🇩', 'Guatemala': '🇬🇹', 'Guinea': '🇬🇳', 'Guinea-Bissau': '🇬🇼',
-    'Guyana': '🇬🇾', 'Haiti': '🇭🇹', 'Holy See': '🇻🇦', 'Honduras': '🇭🇳', 'Hungary': '🇭🇺',
-    'Iceland': '🇮🇸', 'India': '🇮🇳', 'Indonesia': '🇮🇩', 'Iran': '🇮🇷', 'Iraq': '🇮🇶',
-    'Ireland': '🇮🇪', 'Israel': '🇮🇱', 'Italy': '🇮🇹', 'Jamaica': '🇯🇲', 'Japan': '🇯🇵',
-    'Jordan': '🇯🇴', 'Kazakhstan': '🇰🇿', 'Kenya': '🇰🇪', 'Kiribati': '🇰🇮', 'Kuwait': '🇰🇼',
-    'Kyrgyzstan': '🇰🇬', 'Laos': '🇱🇦', 'Latvia': '🇱🇻', 'Lebanon': '🇱🇧', 'Lesotho': '🇱🇸',
-    'Liberia': '🇱🇷', 'Libya': '🇱🇾', 'Liechtenstein': '🇱🇮', 'Lithuania': '🇱🇹', 'Luxembourg': '🇱🇺',
-    'Madagascar': '🇲🇬', 'Malawi': '🇲🇼', 'Malaysia': '🇲🇾', 'Maldives': '🇲🇻', 'Mali': '🇲🇱',
-    'Malta': '🇲🇹', 'Marshall Islands': '🇲🇭', 'Mauritania': '🇲🇷', 'Mauritius': '🇲🇺', 'Mexico': '🇲🇽',
-    'Micronesia': '🇫🇲', 'Moldova': '🇲🇩', 'Monaco': '🇲🇨', 'Mongolia': '🇲🇳', 'Montenegro': '🇲🇪',
-    'Morocco': '🇲🇦', 'Mozambique': '🇲🇿', 'Myanmar': '🇲🇲', 'Namibia': '🇳🇦', 'Nauru': '🇳🇷',
-    'Nepal': '🇳🇵', 'Netherlands': '🇳🇱', 'New Zealand': '🇳🇿', 'Nicaragua': '🇳🇮', 'Niger': '🇳🇪',
-    'Nigeria': '🇳🇬', 'North Korea': '🇰🇵', 'North Macedonia': '🇲🇰', 'Norway': '🇳🇴', 'Oman': '🇴🇲',
-    'Pakistan': '🇵🇰', 'Palau': '🇵🇼', 'Palestine State': '🇵🇸', 'Panama': '🇵🇦', 'Papua New Guinea': '🇵🇬',
-    'Paraguay': '🇵🇾', 'Peru': '🇵🇪', 'Philippines': '🇵🇭', 'Poland': '🇵🇱', 'Portugal': '🇵🇹',
-    'Qatar': '🇶🇦', 'Romania': '🇷🇴', 'Russia': '🇷🇺', 'Rwanda': '🇷🇼', 'Saint Kitts and Nevis': '🇰🇳',
-    'Saint Lucia': '🇱🇨', 'Saint Vincent and the Grenadines': '🇻🇨', 'Samoa': '🇼🇸', 'San Marino': '🇸🇲',
-    'Sao Tome and Principe': '🇸🇹', 'Saudi Arabia': '🇸🇦', 'Senegal': '🇸🇳', 'Serbia': '🇷🇸',
-    'Seychelles': '🇸🇨', 'Sierra Leone': '🇸🇱', 'Singapore': '🇸🇬', 'Slovakia': '🇸🇰', 'Slovenia': '🇸🇮',
-    'Solomon Islands': '🇸🇧', 'Somalia': '🇸🇴', 'South Africa': '🇿🇦', 'South Korea': '🇰🇷',
-    'South Sudan': '🇸🇸', 'Spain': '🇪🇸', 'Sri Lanka': '🇱🇰', 'Sudan': '🇸🇩', 'Suriname': '🇸🇷',
-    'Sweden': '🇸🇪', 'Switzerland': '🇨🇭', 'Syria': '🇸🇾', 'Tajikistan': '🇹🇯', 'Tanzania': '🇹🇿',
-    'Thailand': '🇹🇭', 'Timor-Leste': '🇹🇱', 'Togo': '🇹🇬', 'Tonga': '🇹🇴', 'Trinidad and Tobago': '🇹🇹',
-    'Tunisia': '🇹🇳', 'Turkey': '🇹🇷', 'Turkmenistan': '🇹🇲', 'Tuvalu': '🇹🇻', 'Uganda': '🇺🇬',
-    'Ukraine': '🇺🇦', 'United Arab Emirates': '🇦🇪', 'United Kingdom': '🇬🇧', 'United States': '🇺🇸',
-    'Uruguay': '🇺🇾', 'Uzbekistan': '🇺🇿', 'Vanuatu': '🇻🇺', 'Venezuela': '🇻🇪', 'Vietnam': '🇻🇳',
-    'Yemen': '🇾🇪', 'Zambia': '🇿🇲', 'Zimbabwe': '🇿🇼',
-}
 
 const genres = ['All', 'Technology', 'Travel', 'Food', 'Lifestyle', 'Fiction', 'Opinion', 'Health', 'Finance', 'Gaming', 'Culture', 'Else']
 
@@ -69,19 +26,14 @@ export default function UserProfile() {
         loadPosts()
     }, [id])
 
-    useEffect(() => {
-        filterPosts()
-    }, [posts, searchQuery, selectedGenre])
+    useEffect(() => { filterPosts() }, [posts, searchQuery, selectedGenre])
 
     const loadUser = async () => {
         try {
             const data = await getUserById(id)
             setProfileUser(data)
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setLoading(false)
-        }
+        } catch (err) { console.error(err) }
+        finally { setLoading(false) }
     }
 
     const loadPosts = async () => {
@@ -89,266 +41,195 @@ export default function UserProfile() {
             const data = await getPostsByUserId(id)
             setPosts(data)
             setFilteredPosts(data)
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setPostsLoading(false)
-        }
+        } catch (err) { console.error(err) }
+        finally { setPostsLoading(false) }
     }
 
     const filterPosts = () => {
         let result = [...posts]
-
-        if (selectedGenre !== 'All') {
-            result = result.filter(p => p.genre === selectedGenre)
-        }
-
-        if (searchQuery.trim()) {
-            result = result.filter(p =>
-                p.title.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        }
-
+        if (selectedGenre !== 'All') result = result.filter(p => p.genre === selectedGenre)
+        if (searchQuery.trim()) result = result.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()))
         setFilteredPosts(result)
     }
 
-    const handleSearch = (e) => {
-        e.preventDefault()
-        filterPosts()
-    }
-
     const handleClearFilters = () => {
-        setSearchQuery('')
-        setSelectedGenre('All')
-        setFilteredPosts(posts)
+        setSearchQuery(''); setSelectedGenre('All'); setFilteredPosts(posts)
     }
 
     const getJoinedDate = (dateStr) => {
         if (!dateStr) return 'Unknown'
-        return new Date(dateStr).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long'
-        })
+        return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
     }
 
     const isOwnProfile = currentUser && String(currentUser.id) === String(id)
     const isFiltered = searchQuery.trim() || selectedGenre !== 'All'
-    const availableGenres = genres
 
     if (loading) return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="flex flex-col items-center justify-center py-20 opacity-70">
-                <div className="w-10 h-10 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-indigo-400 font-medium animate-pulse">
-                    Loading profile...
-                </p>
+            <div className="flex-1 flex flex-col items-center justify-center py-24">
+                <div className="ink-spinner mb-4"></div>
+                <p className="typewriter-text text-[#8B5A2B] text-sm">Retrieving correspondent profile…</p>
             </div>
+            <Footer />
         </div>
     )
 
     if (!profileUser) return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="glass-card text-center py-20 mx-auto max-w-3xl mt-12 flex flex-col items-center">
-                <span className="text-6xl mb-4 opacity-50">👤</span>
-                <h3 className="text-xl font-bold text-white mb-2">
-                    User not found
+            <div className="flex-1 flex flex-col items-center justify-center py-24 text-center">
+                <p className="text-5xl mb-4">👤</p>
+                <h3 className="text-xl font-bold text-[#1F1B16]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    Correspondent not found
                 </h3>
-                <button
-                    onClick={() => navigate('/')}
-                    className="mt-4 btn-gradient px-6 py-2">
-                    Go Home
-                </button>
+                <button onClick={() => navigate('/')} className="mt-6 ink-btn text-xs">Return to Archive</button>
             </div>
+            <Footer />
         </div>
     )
 
     return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="max-w-5xl mx-auto px-6 py-10 animate-fade-in">
 
-                {/* Profile Header Card */}
-                <div className="glass p-8 rounded-3xl mb-8 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 opacity-90"></div>
+            <main className="flex-1 max-w-5xl mx-auto px-4 md:px-6 py-10 w-full fade-in">
 
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-
-                        {/* Avatar */}
-                        <div className="w-24 h-24 rounded-full bg-indigo-500/20 border-2 border-indigo-500/30 flex items-center justify-center text-4xl font-bold text-indigo-400 shrink-0">
-                            {profileUser.name?.charAt(0).toUpperCase()}
+                {/* Author header card */}
+                <div className="paper-card p-8 mb-8">
+                    <div className="flex flex-col md:flex-row items-start gap-6">
+                        <div
+                            className="w-20 h-20 rounded-full border-2 border-[#8B5A2B] flex items-center justify-center shrink-0"
+                            style={{ background: '#EADCC5' }}
+                        >
+                            <span className="text-3xl font-black text-[#7A2E2E]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                {profileUser.name?.charAt(0)?.toUpperCase() || '?'}
+                            </span>
                         </div>
 
-                        {/* Info - Restructured for consistency */}
                         <div className="flex-1">
-                            {/* Name and Badge */}
-                            <div className="flex flex-wrap items-center gap-3 mb-2">
-                                <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                            <div className="flex flex-wrap items-center gap-3 mb-1">
+                                <h1 className="text-2xl font-black text-[#1F1B16]" style={{ fontFamily: "'Playfair Display', serif" }}>
                                     {profileUser.name}
                                 </h1>
                                 {isOwnProfile && (
-                                    <span className="text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-3 py-1 rounded-full">
-                                        You
+                                    <span className="genre-label" style={{ color: '#7A2E2E', borderColor: '#7A2E2E', fontSize: '0.6rem' }}>
+                                        YOU
                                     </span>
                                 )}
                             </div>
+                            <p className="byline">@{profileUser.username || 'anonymous'}</p>
 
-                            {/* Username */}
-                            <p className="text-indigo-400 font-medium mb-3">
-                                @{profileUser.username || 'anonymous'}
-                            </p>
+                            {profileUser.bio && (
+                                <p className="text-[#4A3F32] text-sm leading-relaxed mt-3 max-w-xl" style={{ fontFamily: "'IBM Plex Serif', serif" }}>
+                                    {profileUser.bio}
+                                </p>
+                            )}
 
-                            {/* Bio */}
-                            <p className="text-slate-300 text-sm leading-relaxed mb-4 max-w-xl min-h-[3rem]">
-                                {profileUser.bio || <span className="text-slate-500 italic">No bio added yet</span>}
-                            </p>
-
-                            {/* Stats Grid - Always Displayed */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                            {/* Stats */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-[#E0D4C0]">
                                 {profileUser.country && (
-                                    <div className="flex flex-col">
-                                        <span className="text-xs text-slate-500 font-medium mb-1">Location</span>
-                                        <span className="text-sm text-slate-300">
-                                            {profileUser.country}
-                                        </span>
+                                    <div>
+                                        <p className="section-header" style={{ fontSize: '0.6rem', marginBottom: '0.15rem', borderBottom: 'none' }}>Location</p>
+                                        <p className="typewriter-text text-[#4A3F32] text-xs">{profileUser.country}</p>
                                     </div>
                                 )}
-                                <div className="flex flex-col">
-                                    <span className="text-xs text-slate-500 font-medium mb-1">Joined</span>
-                                    <span className="text-sm text-slate-300">
-                                        {getJoinedDate(profileUser.createdAt)}
-                                    </span>
+                                <div>
+                                    <p className="section-header" style={{ fontSize: '0.6rem', marginBottom: '0.15rem', borderBottom: 'none' }}>Correspondent Since</p>
+                                    <p className="typewriter-text text-[#4A3F32] text-xs">{getJoinedDate(profileUser.createdAt)}</p>
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-xs text-slate-500 font-medium mb-1">Posts</span>
-                                    <span className="text-sm text-slate-300">
-                                        {posts.length} {posts.length === 1 ? 'post' : 'posts'}
-                                    </span>
+                                <div>
+                                    <p className="section-header" style={{ fontSize: '0.6rem', marginBottom: '0.15rem', borderBottom: 'none' }}>Articles Published</p>
+                                    <p className="typewriter-text text-[#4A3F32] text-xs">{posts.length}</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-3 shrink-0">
-                            {isOwnProfile && (
-                                <button
-                                    onClick={() => navigate('/edit-profile')}
-                                    className="text-sm px-5 py-2 rounded-full border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 transition-colors">
-                                    ✏️ Edit Profile
-                                </button>
-                            )}
-                        </div>
+                        {isOwnProfile && (
+                            <button onClick={() => navigate('/edit-profile')} className="ink-btn-ghost text-xs shrink-0">
+                                Edit Profile
+                            </button>
+                        )}
                     </div>
                 </div>
 
-                {/* Posts Section */}
+                {/* Articles section */}
                 <div>
-                    <div className="flex items-center gap-2 mb-6">
-                        <span className="text-2xl">✍️</span>
-                        <h2 className="text-2xl font-bold text-white">
-                            {isOwnProfile ? 'My Posts' : `Posts by ${profileUser.name}`}
-                        </h2>
+                    <div className="section-header">
+                        {isOwnProfile ? 'My Dispatches' : `Articles by ${profileUser.name}`}
                     </div>
 
-                    {/* Search and Filter */}
+                    {/* Search + Genre Filter */}
                     {!postsLoading && posts.length > 0 && (
-                        <div className="glass p-4 rounded-2xl mb-6 flex flex-col gap-4">
-
-                            {/* Search Bar */}
-                            <form onSubmit={handleSearch} className="flex gap-2">
+                        <div className="paper-card p-4 mb-6">
+                            <div className="flex gap-2 mb-3">
                                 <input
                                     type="text"
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search posts by title..."
-                                    className="flex-1 glass-input py-2.5 text-sm"
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    placeholder="Search by title…"
+                                    className="ink-input flex-1 text-sm"
                                 />
-                                <button
-                                    type="submit"
-                                    className="btn-gradient px-5 py-2.5 text-sm">
-                                    🔍 Search
-                                </button>
                                 {isFiltered && (
-                                    <button
-                                        type="button"
-                                        onClick={handleClearFilters}
-                                        className="px-4 py-2.5 rounded-xl border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-colors text-sm">
+                                    <button onClick={handleClearFilters} className="ink-btn-ghost text-xs px-3">
                                         ✕ Clear
                                     </button>
                                 )}
-                            </form>
-
-                            {/* Genre Filter */}
-                            <div className="flex flex-wrap gap-2">
-                                {availableGenres.map(genre => (
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                                {genres.map(g => (
                                     <button
-                                        key={genre}
-                                        onClick={() => setSelectedGenre(genre)}
-                                        className={`text-xs px-3 py-1.5 rounded-full border transition-all font-medium
-                                            ${selectedGenre === genre
-                                                ? 'bg-indigo-500/30 text-indigo-300 border-indigo-500/50'
-                                                : `${genre !== 'All' ? getGenreColor(genre) : 'text-slate-400 border-white/10'} hover:border-white/20`
-                                            }`}>
-                                        {genre}
+                                        key={g}
+                                        onClick={() => setSelectedGenre(g)}
+                                        className="genre-label text-xs transition-all"
+                                        style={{
+                                            fontFamily: "'Special Elite', monospace",
+                                            color: selectedGenre === g ? '#FAF6EE' : '#8B5A2B',
+                                            background: selectedGenre === g ? '#7A2E2E' : 'transparent',
+                                            borderColor: selectedGenre === g ? '#7A2E2E' : '#8B5A2B',
+                                            padding: '0.15rem 0.6rem',
+                                            fontSize: '0.6rem',
+                                        }}
+                                    >
+                                        {g.toUpperCase()}
                                     </button>
                                 ))}
                             </div>
-
-                            {/* Filter Results Count */}
                             {isFiltered && (
-                                <p className="text-xs text-slate-400">
-                                    Showing {filteredPosts.length} of {posts.length} posts
-                                    {searchQuery && ` for "${searchQuery}"`}
-                                    {selectedGenre !== 'All' && ` in ${selectedGenre}`}
+                                <p className="typewriter-text text-[#8B5A2B] text-xs mt-2">
+                                    Showing {filteredPosts.length} of {posts.length} articles
                                 </p>
                             )}
                         </div>
                     )}
 
                     {postsLoading ? (
-                        <div className="flex flex-col items-center justify-center py-20 opacity-70">
-                            <div className="w-10 h-10 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                            <p className="text-indigo-400 font-medium animate-pulse">
-                                Loading posts...
-                            </p>
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <div className="ink-spinner mb-4"></div>
+                            <p className="typewriter-text text-[#8B5A2B] text-sm">Loading dispatches…</p>
                         </div>
                     ) : posts.length === 0 ? (
-                        <div className="glass-card text-center py-20 flex flex-col items-center">
-                            <span className="text-6xl mb-4 opacity-50">📭</span>
-                            <h3 className="text-xl font-bold text-slate-200 mb-2">
-                                No posts yet
+                        <div className="paper-card text-center py-16 flex flex-col items-center">
+                            <p className="text-4xl mb-4 opacity-30">📭</p>
+                            <h3 className="text-lg font-bold text-[#1F1B16] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                No articles yet
                             </h3>
-                            <p className="text-slate-400">
-                                {isOwnProfile
-                                    ? 'You have not published any posts yet'
-                                    : `${profileUser.name} has not published any posts yet`}
+                            <p className="typewriter-text text-[#8B5A2B] text-sm">
+                                {isOwnProfile ? 'You have not published any posts yet.' : `${profileUser.name} has not published yet.`}
                             </p>
                             {isOwnProfile && (
-                                <button
-                                    onClick={() => navigate('/write')}
-                                    className="mt-6 btn-gradient px-6 py-2">
-                                    Write your first post
+                                <button onClick={() => navigate('/write')} className="stamp-btn text-xs mt-5">
+                                    Write First Article
                                 </button>
                             )}
                         </div>
                     ) : filteredPosts.length === 0 ? (
-                        <div className="glass-card text-center py-20 flex flex-col items-center">
-                            <span className="text-6xl mb-4 opacity-50">🔍</span>
-                            <h3 className="text-xl font-bold text-slate-200 mb-2">
-                                No posts found
-                            </h3>
-                            <p className="text-slate-400 mb-4">
-                                Try adjusting your search or filter
-                            </p>
-                            <button
-                                onClick={handleClearFilters}
-                                className="btn-gradient px-6 py-2 text-sm">
-                                Clear Filters
-                            </button>
+                        <div className="paper-card text-center py-12">
+                            <p className="typewriter-text text-[#8B5A2B] text-sm mb-3">No articles match your filter.</p>
+                            <button onClick={handleClearFilters} className="ink-btn-ghost text-xs">Clear Filters</button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             {filteredPosts.map(post => (
                                 <BlogCard
                                     key={post.id}
@@ -362,7 +243,9 @@ export default function UserProfile() {
                         </div>
                     )}
                 </div>
-            </div>
+            </main>
+
+            <Footer />
         </div>
     )
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import BlogCard from '../components/BlogCard'
 import { getBookmarks } from '../services/bookmarkService'
 import { useAuth } from '../context/AuthContext'
@@ -28,42 +29,54 @@ export default function Bookmarks() {
     }
 
     return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="max-w-6xl mx-auto px-6 py-10 animate-fade-in">
-                <div className="flex items-center gap-3 mb-8">
-                    <span className="text-3xl">🔖</span>
-                    <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                        My Bookmarks
+
+            <main className="flex-1 max-w-6xl mx-auto px-4 md:px-6 py-10 w-full">
+                {/* Page header */}
+                <div className="mb-8">
+                    <div className="vintage-rule-thick mb-3"></div>
+                    <h1
+                        className="text-3xl md:text-4xl font-black text-[#1F1B16]"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                        My Clippings Library
                     </h1>
+                    <p className="byline mt-1 text-[#8B5A2B]">Articles saved for later reading</p>
+                    <div className="vintage-rule-thick mt-3"></div>
                 </div>
 
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20 opacity-70">
-                        <div className="w-10 h-10 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                        <p className="text-indigo-600 font-medium animate-pulse">
-                            Loading your saved stories...
-                        </p>
+                    <div className="flex flex-col items-center justify-center py-24">
+                        <div className="ink-spinner mb-4"></div>
+                        <p className="typewriter-text text-[#8B5A2B] text-sm">Retrieving your clippings…</p>
                     </div>
                 ) : bookmarks.length === 0 ? (
-                    <div className="glass-card text-center py-20 flex flex-col items-center justify-center max-w-2xl mx-auto mt-10">
-                        <span className="text-6xl mb-4 opacity-70">📚</span>
-                        <h3 className="text-xl font-bold text-white mb-2">Your reading list is empty</h3>
-                        <p className="text-slate-400 mb-6">Save posts you want to read later by clicking the bookmark icon.</p>
-                        <button
-                            onClick={() => navigate('/')}
-                            className="btn-gradient">
-                            Discover Posts
+                    <div className="paper-card text-center py-20 flex flex-col items-center justify-center">
+                        <p className="text-5xl mb-4 opacity-30">📚</p>
+                        <h3
+                            className="text-xl font-bold text-[#1F1B16] mb-2"
+                            style={{ fontFamily: "'Playfair Display', serif" }}
+                        >
+                            Your library is empty
+                        </h3>
+                        <p className="typewriter-text text-[#8B5A2B] text-sm mb-6">
+                            Save articles you wish to return to.
+                        </p>
+                        <button onClick={() => navigate('/')} className="ink-btn text-xs">
+                            Explore the Archive
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {bookmarks.filter(b => b.post != null).map(bookmark => (
                             <BlogCard key={bookmark.id} post={bookmark.post} />
                         ))}
                     </div>
                 )}
-            </div>
+            </main>
+
+            <Footer />
         </div>
     )
 }

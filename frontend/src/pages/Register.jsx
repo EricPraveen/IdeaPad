@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../services/authService'
 import { useAuth } from '../context/AuthContext'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 
 const countries = [
     "Afghanistan", "Albania", "Algeria", "Andorra", "Angola",
@@ -43,17 +45,12 @@ const countries = [
     "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom",
     "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela",
     "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-];
+]
 
 export default function Register() {
     const [form, setForm] = useState({
-        name: '',
-        email: '',
-        password: '',
-        username: '',
-        gender: '',
-        country: '',
-        dateOfBirth: ''
+        name: '', email: '', password: '', username: '',
+        gender: '', country: '', dateOfBirth: ''
     })
     const [error, setError] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -72,176 +69,156 @@ export default function Register() {
             navigate('/')
         } catch (err) {
             console.error('Registration Error:', err)
-            if (err.response && err.response.data && err.response.data.message) {
-                setError(err.response.data.message)
-            } else if (err.response && typeof err.response.data === 'string') {
-                setError(err.response.data)
-            } else {
-                setError(err.message || 'Registration failed. Please try again.')
-            }
+            if (err.response?.data?.message) setError(err.response.data.message)
+            else if (err.response && typeof err.response.data === 'string') setError(err.response.data)
+            else setError(err.message || 'Registration failed. Please try again.')
         }
     }
 
-    return (
-        <div className="flex-1 w-full flex items-center justify-center p-6 mt-8 mb-16 animate-fade-in text-slate-200">
-            <div className="glass p-8 md:p-12 rounded-3xl w-full max-w-2xl relative overflow-hidden group shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/5">
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                <div className="text-center mb-8">
-                    <div className="flex justify-center mb-4">
-                        <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center shadow-inner border border-white/5">
-                            <span className="text-3xl">✨</span>
-                        </div>
-                    </div>
-                    <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                        Create account
-                    </h1>
-                    <p className="text-slate-400 font-medium mt-3">Join our community today</p>
-                </div>
+    const inputClass = "ink-input w-full"
+    const selectClass = "ink-select w-full"
 
-                {error && (
-                    <div className="bg-red-950/50 border border-red-500/30 text-red-400 p-4 rounded-xl mb-8 text-sm flex items-center gap-3 font-medium">
-                        <span className="text-lg">⚠️</span> {error}
+    return (
+        <div className="flex flex-col min-h-screen">
+            <Navbar />
+
+            <main className="flex-1 flex items-center justify-center p-6 py-12">
+                <div className="w-full max-w-2xl ink-reveal">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                        <div className="vintage-rule-double mb-4"></div>
+                        <h1 className="text-3xl font-black text-[#1F1B16]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Join the Press
+                        </h1>
+                        <p className="typewriter-text text-[#8B5A2B] text-sm mt-2">
+                            Become a correspondent at IdeaPad
+                        </p>
+                        <div className="vintage-rule-double mt-4"></div>
                     </div>
-                )}
-                
-                <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Full Name
-                            </label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={form.name}
-                                onChange={handleChange}
-                                required
-                                placeholder="Your full name"
-                                className="w-full glass-input text-base py-3"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Username
-                            </label>
-                            <input
-                                type="text"
-                                name="username"
-                                value={form.username}
-                                onChange={handleChange}
-                                required
-                                placeholder="@username"
-                                className="w-full glass-input text-base py-3"
-                            />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Email address
-                            </label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={form.email}
-                                onChange={handleChange}
-                                required
-                                placeholder="you@example.com"
-                                className="w-full glass-input text-base py-3"
-                            />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    name="password"
-                                    value={form.password}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Choose a strong password"
-                                    className="w-full glass-input text-base py-3 pr-10"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
-                                >
-                                    {showPassword ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
-                                    ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    )}
-                                </button>
+
+                    <div className="paper-card p-8">
+                        {error && (
+                            <div className="border border-[#7A2E2E] bg-[#FBF0F0] text-[#7A2E2E] p-4 mb-6 text-sm flex items-center gap-3">
+                                <span>⚠</span>
+                                <span style={{ fontFamily: "'IBM Plex Serif', serif" }}>{error}</span>
                             </div>
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Date of Birth
-                            </label>
-                            <input
-                                type="date"
-                                name="dateOfBirth"
-                                value={form.dateOfBirth}
-                                onChange={handleChange}
-                                required
-                                className="w-full glass-input text-base py-3 [&::-webkit-calendar-picker-indicator]:invert hover:[&::-webkit-calendar-picker-indicator]:opacity-75"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Gender
-                            </label>
-                            <select
-                                name="gender"
-                                value={form.gender}
-                                onChange={handleChange}
-                                required
-                                className="w-full glass-input text-base py-3 [&>option]:bg-slate-800 [&>option]:text-slate-200">
-                                <option value="">Select gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                                <option value="Prefer not to say">
-                                    Prefer not to say
-                                </option>
-                            </select>
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Country
-                            </label>
-                            <select
-                                name="country"
-                                value={form.country}
-                                onChange={handleChange}
-                                required
-                                className="w-full glass-input text-base py-3 [&>option]:bg-slate-800 [&>option]:text-slate-200">
-                                <option value="">Select country</option>
-                                {countries.map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label className="byline block mb-2">Full Name</label>
+                                    <input
+                                        type="text" name="name" value={form.name}
+                                        onChange={handleChange} required
+                                        placeholder="Your full name"
+                                        className={inputClass}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="byline block mb-2">Username</label>
+                                    <input
+                                        type="text" name="username" value={form.username}
+                                        onChange={handleChange} required
+                                        placeholder="@yourname"
+                                        className={inputClass}
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="byline block mb-2">Email Address</label>
+                                    <input
+                                        type="email" name="email" value={form.email}
+                                        onChange={handleChange} required
+                                        placeholder="you@example.com"
+                                        className={inputClass}
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="byline block mb-2">Password</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            name="password" value={form.password}
+                                            onChange={handleChange} required
+                                            placeholder="Choose a strong password"
+                                            className={`${inputClass} pr-10`}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#8B5A2B] hover:text-[#1F1B16]"
+                                        >
+                                            {showPassword ? (
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                                                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                                                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                                                    <line x1="2" x2="22" y1="2" y2="22"/>
+                                                </svg>
+                                            ) : (
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                                    <circle cx="12" cy="12" r="3"/>
+                                                </svg>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="byline block mb-2">Date of Birth</label>
+                                    <input
+                                        type="date" name="dateOfBirth" value={form.dateOfBirth}
+                                        onChange={handleChange} required
+                                        className={`${inputClass} [&::-webkit-calendar-picker-indicator]:opacity-50`}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="byline block mb-2">Gender</label>
+                                    <select
+                                        name="gender" value={form.gender}
+                                        onChange={handleChange} required
+                                        className={selectClass}
+                                    >
+                                        <option value="">Select gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                        <option value="Prefer not to say">Prefer not to say</option>
+                                    </select>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="byline block mb-2">Country of Origin</label>
+                                    <select
+                                        name="country" value={form.country}
+                                        onChange={handleChange} required
+                                        className={selectClass}
+                                    >
+                                        <option value="">Select country</option>
+                                        {countries.map(c => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" className="stamp-btn w-full py-3 text-sm tracking-widest mt-2">
+                                Enlist as Correspondent
+                            </button>
+                        </form>
+
+                        <div className="mt-6 pt-5 border-t border-[#E0D4C0] text-center">
+                            <p className="typewriter-text text-xs text-[#8B5A2B]">
+                                Already a member?{' '}
+                                <Link to="/login" className="text-[#7A2E2E] font-semibold hover:underline">
+                                    Sign in here
+                                </Link>
+                            </p>
                         </div>
                     </div>
-                    
-                    <button
-                        type="submit"
-                        className="btn-gradient w-full py-3.5 mt-2 text-base font-semibold shadow-indigo-500/25 tracking-wide">
-                        Create Account
-                    </button>
-                </form>
-                
-                <div className="mt-8 pt-6 border-t border-white/10 text-center">
-                    <p className="text-sm text-slate-400">
-                        Already have an account?{' '}
-                        <Link to="/login" className="text-indigo-400 font-semibold hover:text-fuchsia-400 transition-colors">
-                            Log in instead
-                        </Link>
-                    </p>
                 </div>
-            </div>
+            </main>
+
+            <Footer />
         </div>
     )
 }

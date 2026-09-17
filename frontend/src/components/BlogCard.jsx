@@ -3,6 +3,14 @@ import { getGenreColor } from '../utils/genreColors'
 import { useAuth } from '../context/AuthContext'
 import { deletePost } from '../services/postService'
 
+// Estimate reading time
+function readingTime(content) {
+    const text = content?.replace(/<[^>]+>/g, '') || ''
+    const words = text.split(/\s+/).filter(Boolean).length
+    const mins = Math.max(1, Math.round(words / 200))
+    return `${mins} min read`
+}
+
 export default function BlogCard({ post, onDelete, isOwner }) {
     const { user } = useAuth()
     const navigate = useNavigate()
@@ -13,7 +21,7 @@ export default function BlogCard({ post, onDelete, isOwner }) {
     ))
 
     const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete this post?')) return
+        if (!window.confirm('Delete this post from the archive?')) return
         try {
             await deletePost(post.id)
             if (onDelete) onDelete(post.id)
@@ -22,72 +30,121 @@ export default function BlogCard({ post, onDelete, isOwner }) {
         }
     }
 
+    const dateStr = post.createdAt
+        ? new Date(post.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+        : ''
+
+    const plainText = post.content?.replace(/<[^>]+>/g, '') || ''
+    const excerpt = plainText.length > 160 ? plainText.slice(0, 160) + '…' : plainText
+
     return (
-        <div className="glass-card p-5 group">
+        <article className="paper-card group" style={{ padding: 0, overflow: 'hidden' }}>
+            {/* Cover image — editorial polaroid style */}
             {post.coverImage && (
-                <div className="overflow-hidden rounded-lg mb-4">
+                <div className="overflow-hidden border-b border-[#C8B89A]" style={{ height: '180px' }}>
                     <img
                         src={post.coverImage}
                         alt={post.title}
-                        className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover editorial-img group-hover:scale-[1.03] transition-transform duration-700"
+                        style={{ filter: 'sepia(0.18) contrast(1.05)' }}
                     />
                 </div>
             )}
-            <div className="flex items-center gap-2 mb-3">
-                <span className={`${getGenreColor(post.genre)} border text-xs px-3 py-1 rounded-full font-medium`}>
-                    {post.genre}
-                </span>
-                {post.isFeatured && (
-                    <span className="bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30 text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1">
-                        <span>🔥</span> Featured
+
+            <div className="p-5">
+                {/* Category + Featured badge row */}
+                <div className="flex items-center gap-2 mb-3">
+                    <span className={getGenreColor(post.genre)}>
+                        {post.genre || 'Essay'}
                     </span>
-                )}
-            </div>
-            <h2 className="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">
-                {post.title}
-            </h2>
-            <p className="text-slate-400 text-sm mb-4 line-clamp-2 leading-relaxed">
-                {post.content.replace(/<[^>]+>/g, '')}
-            </p>
-            <div className="flex justify-between items-center">
-                {post.isAnonymous ? (
-            <span className="text-xs text-indigo-400 font-medium truncate pr-2">
-                By Anonymous
-            </span>
-            ) : (
-            <Link
-                to={`/user/${post.authorId}`}
-                className="text-xs text-indigo-400 font-medium truncate pr-2 hover:text-fuchsia-400 transition-colors">
-                By {post.authorName}
-            </Link>
-            )}
-                <div className="flex items-center gap-3">
+                    {post.isFeatured && (
+                        <span className="genre-label" style={{ color: '#7A2E2E', borderColor: '#7A2E2E', background: '#FBEEEE' }}>
+                            ★ Featured
+                        </span>
+                    )}
+                </div>
+
+                {/* Vintage rule */}
+                <hr className="vintage-rule" style={{ margin: '0 0 0.75rem 0' }} />
+
+                {/* Headline */}
+                <Link to={`/post/${post.id}`}>
+                    <h2
+                        className="text-xl font-bold text-[#1F1B16] group-hover:text-[#7A2E2E] transition-colors leading-snug mb-2"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                        {post.title}
+                    </h2>
+                </Link>
+
+                {/* Excerpt */}
+                <p className="text-[#4A3F32] text-sm leading-relaxed mb-4" style={{ fontFamily: "'IBM Plex Serif', serif" }}>
+                    {excerpt}
+                </p>
+
+                {/* Vintage rule */}
+                <hr className="vintage-rule" style={{ margin: '0 0 0.75rem 0' }} />
+
+                {/* Byline row */}
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-3">
+                        {post.isAnonymous ? (
+                            <span className="byline">Anonymous</span>
+                        ) : (
+                            <Link
+                                to={`/user/${post.authorId}`}
+                                className="byline hover:text-[#7A2E2E] transition-colors"
+                            >
+                                By {post.authorName}
+                            </Link>
+                        )}
+                        {dateStr && (
+                            <span className="text-[#8B5A2B] text-xs opacity-70" style={{ fontFamily: "'Special Elite', monospace" }}>
+                                · {dateStr}
+                            </span>
+                        )}
+                        <span className="text-[#8B5A2B] text-xs opacity-70" style={{ fontFamily: "'Special Elite', monospace" }}>
+                            · {readingTime(post.content)}
+                        </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2">
+                        {isAuthor && (
+                            <button
+                                onClick={() => navigate(`/write?edit=${post.id}`)}
+                                className="ink-btn-ghost text-xs px-2 py-1"
+                                style={{ fontSize: '0.65rem' }}
+                            >
+                                Edit
+                            </button>
+                        )}
+                        <Link
+                            to={`/post/${post.id}`}
+                            className="ink-btn text-xs px-3 py-1"
+                            style={{ fontSize: '0.65rem' }}
+                        >
+                            Read →
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Bottom strip — likes + delete */}
+                <div className="mt-3 pt-2 border-t border-[#E0D4C0] flex items-center justify-between">
+                    <span className="text-xs text-[#8B5A2B]" style={{ fontFamily: "'Special Elite', monospace" }}>
+                        ♥ {post.likeCount || 0} likes
+                    </span>
                     {isAuthor && (
                         <button
-                            onClick={() => navigate(`/write?edit=${post.id}`)}
-                            className="text-xs px-2.5 py-1 rounded-md border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 transition-colors flex items-center gap-1">
-                            ✏️ Edit
+                            onClick={handleDelete}
+                            className="text-xs text-[#7A2E2E] hover:underline transition-colors"
+                            style={{ fontFamily: "'Special Elite', monospace" }}
+                        >
+                            Delete
                         </button>
                     )}
-                    <Link
-                        to={`/post/${post.id}`}
-                        className="text-indigo-400 text-sm font-medium hover:text-fuchsia-400 transition-colors flex items-center gap-1 whitespace-nowrap">
-                        Read more <span className="group-hover:translate-x-1 transition-transform">→</span>
-                    </Link>
                 </div>
             </div>
-            <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-                <span className="text-slate-500 text-xs font-medium">
-                    <span className="text-fuchsia-500">♥</span> {post.likeCount} likes
-                </span>
-                {isAuthor && (
-                    <button
-                        onClick={handleDelete}
-                        className="text-xs px-3 py-1 rounded-full border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors">
-                        🗑 Delete
-                    </button>
-                )}
-            </div>
-        </div>
+        </article>
     )
 }

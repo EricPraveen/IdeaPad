@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <!-- Nib body -->
+  <path d="M16 2 L20 12 L16 16 L12 12 Z" fill="#1F1B16" stroke="#8B5A2B" stroke-width="0.8"/>
+  <!-- Nib split line -->
+  <line x1="16" y1="8" x2="16" y2="16" stroke="#B08968" stroke-width="0.6"/>
+  <!-- Nib tip -->
+  <path d="M16 16 L14.5 20 L16 30 L17.5 20 Z" fill="#1F1B16" stroke="#8B5A2B" stroke-width="0.6"/>
+  <!-- Ink drop -->
+  <ellipse cx="16" cy="30" rx="1.5" ry="1" fill="#7A2E2E" opacity="0.8"/>
+  <!-- Pen body -->
+  <rect x="13.5" y="2" width="5" height="10" rx="2" fill="#B08968" opacity="0.3"/>
+</svg>

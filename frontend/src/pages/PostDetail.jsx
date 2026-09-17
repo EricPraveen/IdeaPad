@@ -1,11 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import { getPostById } from '../services/postService'
 import { toggleBookmark } from '../services/bookmarkService'
 import { useAuth } from '../context/AuthContext'
-import axios from 'axios'
 import { getGenreColor } from '../utils/genreColors'
+import axios from 'axios'
+
+function readingTime(content) {
+    const text = content?.replace(/<[^>]+>/g, '') || ''
+    const words = text.split(/\s+/).filter(Boolean).length
+    return Math.max(1, Math.round(words / 200))
+}
 
 export default function PostDetail() {
     const { id } = useParams()
@@ -16,26 +23,40 @@ export default function PostDetail() {
     const [liked, setLiked] = useState(false)
     const [likeCount, setLikeCount] = useState(0)
     const [bookmarked, setBookmarked] = useState(false)
+    const [readProgress, setReadProgress] = useState(0)
+    const contentRef = useRef(null)
 
     useEffect(() => {
         loadPost()
     }, [id])
+
+    // Reading progress bar
+    useEffect(() => {
+        const handleScroll = () => {
+            const el = contentRef.current
+            if (!el) return
+            const rect = el.getBoundingClientRect()
+            const total = el.offsetHeight - window.innerHeight
+            const scrolled = Math.max(0, -rect.top)
+            const pct = Math.min(100, Math.round((scrolled / total) * 100))
+            setReadProgress(pct)
+        }
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [post])
 
     const loadPost = async () => {
         try {
             const data = await getPostById(id)
             setPost(data)
             setLikeCount(data.likeCount)
-            
             if (user) {
                 try {
                     const likeRes = await axios.get(`http://localhost:8080/api/posts/${id}/like-status`, {
                         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                    });
-                    setLiked(likeRes.data);
-                } catch (likeErr) {
-                    console.error("Failed to fetch like status:", likeErr);
-                }
+                    })
+                    setLiked(likeRes.data)
+                } catch {}
             }
         } catch (err) {
             console.error(err)
@@ -47,16 +68,12 @@ export default function PostDetail() {
     const handleLike = async () => {
         if (!user) return navigate('/login')
         try {
-            await axios.post(
-                `http://localhost:8080/api/posts/${id}/like`,
-                {},
-                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-            )
+            await axios.post(`http://localhost:8080/api/posts/${id}/like`, {}, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            })
             setLiked(!liked)
             setLikeCount(liked ? likeCount - 1 : likeCount + 1)
-        } catch (err) {
-            console.error(err)
-        }
+        } catch (err) { console.error(err) }
     }
 
     const handleBookmark = async () => {
@@ -64,136 +81,203 @@ export default function PostDetail() {
         try {
             await toggleBookmark(id)
             setBookmarked(!bookmarked)
-        } catch (err) {
-            console.error(err)
-        }
+        } catch (err) { console.error(err) }
     }
 
     const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete this post?')) return
+        if (!window.confirm('Remove this article from the archive?')) return
         try {
-            await axios.delete(
-                `http://localhost:8080/api/posts/${id}`,
-                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-            )
+            await axios.delete(`http://localhost:8080/api/posts/${id}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            })
             navigate('/')
-        } catch (err) {
-            console.error(err)
-        }
+        } catch (err) { console.error(err) }
     }
 
     if (loading) return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="flex flex-col items-center justify-center py-20 opacity-70">
-                <div className="w-10 h-10 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-indigo-600 font-medium animate-pulse">Loading post...</p>
+            <div className="flex-1 flex flex-col items-center justify-center py-24">
+                <div className="ink-spinner mb-4"></div>
+                <p className="typewriter-text text-[#8B5A2B] text-sm">Turning the pages…</p>
             </div>
+            <Footer />
         </div>
     )
 
     if (!post) return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="glass-card text-center py-20 mx-auto max-w-3xl mt-12 flex flex-col items-center justify-center">
-                <span className="text-6xl mb-4 opacity-50">📭</span>
-                <h3 className="text-xl font-bold text-gray-700 mb-2">Post not found</h3>
+            <div className="flex-1 flex flex-col items-center justify-center py-24 text-center">
+                <p className="text-5xl mb-4">📰</p>
+                <h2 className="text-2xl font-bold text-[#1F1B16]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    Article not found
+                </h2>
+                <Link to="/" className="ink-btn-ghost mt-6 text-sm">← Back to Archive</Link>
             </div>
+            <Footer />
         </div>
     )
 
+    const dateStr = post.createdAt
+        ? new Date(post.createdAt).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+        : ''
+
+    const mins = readingTime(post.content)
+    const isAuthor = user && (
+        (user.email && post.authorEmail && user.email === post.authorEmail) ||
+        (user.id && post.authorId && user.id === post.authorId)
+    )
+
+    // Add drop cap to content HTML
+    const contentWithDropCap = post.content?.replace(
+        /^(<[^>]+>)*([A-Za-z])/,
+        (match, tags, letter) => `${tags || ''}<span class="drop-cap-letter">${letter}</span>`
+    ) || post.content
+
     return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen" ref={contentRef}>
+            {/* Reading progress bar */}
+            <div id="reading-progress" style={{ width: `${readProgress}%` }}></div>
+
             <Navbar />
-            <div className="max-w-3xl mx-auto px-6 py-10 animate-fade-in">
-                <div className="glass p-8 rounded-3xl">
-                    {/* Genre */}
-                    <span className={`${getGenreColor(post.genre)} border text-xs px-4 py-1.5 rounded-full font-medium inline-block mb-4`}>
-                        {post.genre}
+
+            <main className="flex-1 max-w-3xl mx-auto px-4 md:px-6 py-10 w-full">
+                <article className="fade-in">
+                    {/* Back link */}
+                    <Link
+                        to="/"
+                        className="byline text-[#8B5A2B] hover:text-[#7A2E2E] transition-colors flex items-center gap-1 mb-6 text-xs"
+                    >
+                        ← Return to Archive
+                    </Link>
+
+                    {/* Genre tag */}
+                    <span className={getGenreColor(post.genre)}>
+                        {post.genre || 'Essay'}
                     </span>
 
+                    {/* Double rule */}
+                    <div className="vintage-rule-double mt-4 mb-5"></div>
+
                     {/* Title */}
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
+                    <h1
+                        className="text-3xl md:text-5xl font-black text-[#1F1B16] leading-tight mb-5"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
                         {post.title}
                     </h1>
 
-                    {/* Author & Date */}
-                    <div className="flex items-center gap-4 text-sm text-slate-400 mb-8 font-medium">
-                        <span className="flex items-center gap-1">
-                    <span className="text-lg">✍️</span>
-                    {post.isAnonymous ? 'Anonymous' : (
-                        <Link
-                            to={`/user/${post.authorId}`}
-                            className="hover:text-indigo-400 transition-colors">
-                            {post.authorName}
-                        </Link>
-                    )}
-                    </span>
-                        <span className="flex items-center gap-1">
-                            <span className="text-lg">📅</span> 
-                            {new Date(post.createdAt).toLocaleDateString()}
+                    {/* Byline row */}
+                    <div className="flex flex-wrap items-center gap-4 mb-6 pb-5 border-b border-[#C8B89A]">
+                        <div>
+                            {post.isAnonymous ? (
+                                <span className="byline">By Anonymous</span>
+                            ) : (
+                                <Link to={`/user/${post.authorId}`} className="byline hover:text-[#7A2E2E] transition-colors">
+                                    By {post.authorName}
+                                </Link>
+                            )}
+                        </div>
+                        {dateStr && (
+                            <span className="typewriter-text text-[#8B5A2B] text-xs opacity-75">
+                                {dateStr}
+                            </span>
+                        )}
+                        <span className="typewriter-text text-[#8B5A2B] text-xs opacity-75">
+                            {mins} min read
                         </span>
                     </div>
 
-                    {/* Cover Image */}
+                    {/* Cover image — editorial */}
                     {post.coverImage && (
-                        <div className="overflow-hidden rounded-2xl mb-8 shadow-sm">
+                        <figure className="mb-8">
                             <img
                                 src={post.coverImage}
                                 alt={post.title}
-                                className="w-full h-[400px] object-cover hover:scale-105 transition-transform duration-700"
+                                className="w-full h-[360px] object-cover editorial-img"
                             />
-                        </div>
+                            <figcaption
+                                className="text-center text-xs text-[#8B5A2B] mt-2 italic"
+                                style={{ fontFamily: "'Special Elite', monospace" }}
+                            >
+                                {post.title}
+                            </figcaption>
+                        </figure>
                     )}
 
-                    {/* Content */}
+                    {/* Article content — vintage prose with drop cap */}
                     <div
-                        className="prose prose-lg prose-invert max-w-none text-slate-300 leading-relaxed font-sans"
+                        className="vintage-prose"
+                        style={{ position: 'relative' }}
                         dangerouslySetInnerHTML={{ __html: post.content }}
                     />
 
-                    {/* Actions */}
-                    <div className="flex flex-wrap items-center gap-4 mt-10 pt-8 border-t border-white/10">
+                    {/* Actions row */}
+                    <div className="vintage-rule-double my-8"></div>
+
+                    <div className="flex flex-wrap items-center gap-3">
                         <button
                             onClick={handleLike}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 shadow-sm
-                                ${liked
-                                    ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30'
-                                    : 'btn-glass text-slate-300'
-                                }`}>
-                            <span className={liked ? 'animate-bounce text-fuchsia-400' : 'text-slate-400'}>♥</span> {likeCount} Likes
+                            className={`stamp-btn text-xs flex items-center gap-2 ${liked ? 'bg-[#7A2E2E]' : 'bg-[#1F1B16]'}`}
+                        >
+                            <span>{liked ? '♥' : '♡'}</span>
+                            {likeCount} {likeCount === 1 ? 'Like' : 'Likes'}
                         </button>
 
                         <button
                             onClick={handleBookmark}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 shadow-sm
-                                ${bookmarked
-                                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                                    : 'btn-glass text-slate-300'
-                                }`}>
-                            {bookmarked ? '🔖 Saved' : '🔖 Save'}
+                            className={`ink-btn-ghost text-xs flex items-center gap-2 ${bookmarked ? 'bg-[#8B5A2B] text-[#FAF6EE]' : ''}`}
+                        >
+                            {bookmarked ? '🔖 Saved' : '🔖 Save to Library'}
                         </button>
 
-                        {user && (
-                            (user.email && post.authorEmail && user.email === post.authorEmail) ||
-                            (user.id && post.authorId && user.id === post.authorId)
-                        ) && (
-                            <div className="flex gap-4 ml-auto">
+                        {isAuthor && (
+                            <div className="flex gap-2 ml-auto">
                                 <button
                                     onClick={() => navigate(`/write?edit=${post.id}`)}
-                                    className="btn-glass text-indigo-400">
+                                    className="ink-btn-ghost text-xs"
+                                >
                                     Edit
                                 </button>
                                 <button
                                     onClick={handleDelete}
-                                    className="px-5 py-2.5 rounded-xl text-sm font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all shadow-sm">
+                                    className="stamp-btn text-xs"
+                                    style={{ background: '#5C1F1F' }}
+                                >
                                     Delete
                                 </button>
                             </div>
                         )}
                     </div>
-                </div>
-            </div>
+
+                    {/* Author card */}
+                    {!post.isAnonymous && (
+                        <div className="mt-10 paper-card p-6 flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-full border-2 border-[#8B5A2B] flex items-center justify-center bg-[#EADCC5] shrink-0">
+                                <span className="text-[#7A2E2E] text-xl" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                    {post.authorName?.charAt(0)?.toUpperCase() || 'A'}
+                                </span>
+                            </div>
+                            <div>
+                                <p className="section-header mb-1">About the Author</p>
+                                <Link
+                                    to={`/user/${post.authorId}`}
+                                    className="font-bold text-[#1F1B16] hover:text-[#7A2E2E] transition-colors"
+                                    style={{ fontFamily: "'Playfair Display', serif" }}
+                                >
+                                    {post.authorName}
+                                </Link>
+                                <p className="text-sm text-[#8B5A2B] mt-1">
+                                    View all articles by this correspondent →
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </article>
+            </main>
+
+            <Footer />
         </div>
     )
 }
