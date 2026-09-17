@@ -1,229 +1,277 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { useNavigate, Link } from 'react-router-dom'
 import BlogCard from '../components/BlogCard'
 import { useAuth } from '../context/AuthContext'
 import { getPostsByUserId, getDrafts, publishPost, deletePost } from '../services/postService'
 
 export default function Profile() {
-    const { user } = useAuth()
-    const navigate = useNavigate()
-    const [posts, setPosts] = useState([])
-    const [drafts, setDrafts] = useState([])
-    const [activeTab, setActiveTab] = useState('published')
-    const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [posts, setPosts] = useState([])
+  const [drafts, setDrafts] = useState([])
+  const [activeTab, setActiveTab] = useState('published')
+  const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login')
-        } else {
-            const token = localStorage.getItem('token')
-            if (!token) { navigate('/login'); return }
-            loadPosts()
-            loadDrafts()
-        }
-    }, [user, navigate])
-
-    const loadPosts = async () => {
-        try {
-            const response = await getPostsByUserId(user.id)
-            setPosts(response)
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setLoading(false)
-        }
+  useEffect(() => {
+    if (!user) {
+      navigate('/login')
+    } else {
+      const token = localStorage.getItem('token')
+      if (!token) { navigate('/login'); return }
+      loadPosts()
+      loadDrafts()
     }
+  }, [user, navigate])
 
-    const loadDrafts = async () => {
-        try {
-            const data = await getDrafts()
-            setDrafts(data)
-        } catch (err) {
-            console.error('Error loading drafts:', err)
-            if (err.response?.status === 401 || err.response?.status === 403) {
-                navigate('/login')
-            }
-        }
+  const loadPosts = async () => {
+    try {
+      const response = await getPostsByUserId(user.id)
+      setPosts(response || [])
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    const handlePublish = async (id) => {
-        try {
-            const published = drafts.find(d => d.id === id)
-            await publishPost(id, published)
-            setDrafts(drafts.filter(d => d.id !== id))
-            if (published) setPosts([...posts, { ...published, status: 'published' }])
-            alert('Post published successfully!')
-        } catch (err) {
-            console.error(err)
-            alert('Failed to publish: ' + err.message)
-        }
+  const loadDrafts = async () => {
+    try {
+      const data = await getDrafts()
+      setDrafts(data || [])
+    } catch (err) {
+      console.error('Error loading drafts:', err)
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        navigate('/login')
+      }
     }
+  }
 
-    const handleDeleteDraft = async (id) => {
-        if (!window.confirm('Delete this draft from the archives?')) return
-        try {
-            await deletePost(id)
-            setDrafts(drafts.filter(d => d.id !== id))
-        } catch (err) { console.error(err) }
+  const handlePublish = async (id) => {
+    try {
+      const published = drafts.find(d => d.id === id)
+      await publishPost(id, published)
+      setDrafts(drafts.filter(d => d.id !== id))
+      if (published) setPosts([...posts, { ...published, status: 'published' }])
+    } catch (err) {
+      console.error(err)
+      alert('Failed to publish: ' + err.message)
     }
+  }
 
-    return (
-        <div className="flex flex-col min-h-screen">
-            <Navbar />
+  const handleDeleteDraft = async (id) => {
+    if (!window.confirm('Delete this draft permanently from the archive?')) return
+    try {
+      await deletePost(id)
+      setDrafts(drafts.filter(d => d.id !== id))
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
-            <main className="flex-1 max-w-4xl mx-auto px-4 md:px-6 py-10 w-full">
+  const totalLikes = posts.reduce((acc, p) => acc + (p.likeCount || 0), 0)
 
-                {/* Author Card */}
-                <div className="paper-card p-6 mb-8">
-                    <div className="flex items-start gap-5">
-                        <div
-                            className="w-16 h-16 rounded-full border-2 border-[#8B5A2B] flex items-center justify-center shrink-0"
-                            style={{ background: '#EADCC5' }}
-                        >
-                            <span
-                                className="text-2xl font-bold text-[#7A2E2E]"
-                                style={{ fontFamily: "'Playfair Display', serif" }}
-                            >
-                                {user?.name?.charAt(0)?.toUpperCase() || '?'}
-                            </span>
-                        </div>
-                        <div className="flex-1">
-                            <h1
-                                className="text-2xl font-black text-[#1F1B16]"
-                                style={{ fontFamily: "'Playfair Display', serif" }}
-                            >
-                                {user?.name}
-                            </h1>
-                            <p className="byline mt-0.5">@{user?.username || user?.email}</p>
-                            {user?.bio && (
-                                <p className="text-[#4A3F32] text-sm mt-2 leading-relaxed" style={{ fontFamily: "'IBM Plex Serif', serif" }}>
-                                    {user.bio}
-                                </p>
-                            )}
-                            {user?.country && (
-                                <p className="typewriter-text text-[#8B5A2B] text-xs mt-1">
-                                    📍 {user.country}
-                                </p>
-                            )}
-                        </div>
-                        <button
-                            onClick={() => navigate('/edit-profile')}
-                            className="ink-btn-ghost text-xs shrink-0"
-                        >
-                            Edit Profile
-                        </button>
-                    </div>
-                </div>
-
-                {/* Tab navigation */}
-                <div className="flex gap-3 mb-6">
-                    {['published', 'drafts'].map(tab => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className="genre-label transition-all"
-                            style={{
-                                fontFamily: "'Special Elite', monospace",
-                                color: activeTab === tab ? '#FAF6EE' : '#8B5A2B',
-                                background: activeTab === tab ? '#7A2E2E' : 'transparent',
-                                borderColor: activeTab === tab ? '#7A2E2E' : '#8B5A2B',
-                                padding: '0.35rem 1rem',
-                            }}
-                        >
-                            {tab === 'published'
-                                ? `PUBLISHED (${posts.length})`
-                                : `DRAFTS (${drafts.length})`
-                            }
-                        </button>
-                    ))}
-                </div>
-
-                {/* Content */}
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-24">
-                        <div className="ink-spinner mb-4"></div>
-                        <p className="typewriter-text text-[#8B5A2B] text-sm">Retrieving your dispatches…</p>
-                    </div>
-                ) : activeTab === 'published' ? (
-                    posts.length === 0 ? (
-                        <div className="paper-card text-center py-20 flex flex-col items-center">
-                            <p className="text-4xl mb-4 opacity-30">✒️</p>
-                            <h3 className="text-lg font-bold text-[#1F1B16] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                                No published articles yet
-                            </h3>
-                            <p className="typewriter-text text-[#8B5A2B] text-xs mb-5">The press awaits your first dispatch.</p>
-                            <button onClick={() => navigate('/write')} className="stamp-btn text-xs">
-                                Write First Article
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            {posts.map(post => (
-                                <BlogCard
-                                    key={post.id}
-                                    post={post}
-                                    isOwner={true}
-                                    onDelete={(id) => setPosts(posts.filter(p => p.id !== id))}
-                                />
-                            ))}
-                        </div>
-                    )
-                ) : (
-                    drafts.length === 0 ? (
-                        <div className="paper-card text-center py-20">
-                            <p className="typewriter-text text-[#8B5A2B] text-sm">No drafts in the archive.</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            {drafts.map(draft => (
-                                <div key={draft.id} className="paper-card p-5">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <span className="genre-label" style={{ color: '#B08968', borderColor: '#B08968' }}>
-                                            DRAFT
-                                        </span>
-                                        <span className="typewriter-text text-[#8B5A2B] text-xs">{draft.genre}</span>
-                                    </div>
-                                    <h2
-                                        className="text-lg font-bold text-[#1F1B16] mb-2"
-                                        style={{ fontFamily: "'Playfair Display', serif" }}
-                                    >
-                                        {draft.title || 'Untitled'}
-                                    </h2>
-                                    <p className="text-[#4A3F32] text-sm mb-4 line-clamp-2">
-                                        {draft.content?.replace(/<[^>]+>/g, '')}
-                                    </p>
-                                    <hr className="vintage-rule mb-3" />
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => navigate(`/write?edit=${draft.id}`)}
-                                            className="ink-btn-ghost text-xs px-3 py-1"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handlePublish(draft.id)}
-                                            className="ink-btn text-xs px-3 py-1"
-                                        >
-                                            Publish
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteDraft(draft.id)}
-                                            className="stamp-btn text-xs px-3 py-1"
-                                            style={{ background: '#5C1F1F', border: 'none' }}
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      
+      {/* ─── CORRESPONDENT DOSSIER HEADER ─────────────────── */}
+      <div className="paper-card p-6 sm:p-8 bg-[#FAF6EE] border-2 border-[#DDD2C1] shadow-md">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-[#DDD2C1]">
+          
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-full bg-[#EFE8DC] border-2 border-[#C5A059] flex items-center justify-center font-serif font-black text-3xl text-[#7A1C2E] shadow-sm shrink-0">
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#7A1C2E] px-2 py-0.5 border border-[#7A1C2E] rounded">
+                  ACCIDENTAL WRITER · CORRESPONDENT
+                </span>
+                {user?.role === 'admin' && (
+                  <span className="text-[10px] font-mono uppercase tracking-widest bg-[#7A1C2E] text-[#FAF6EE] px-2 py-0.5 rounded">
+                    EDITOR-IN-CHIEF
+                  </span>
                 )}
-            </main>
+              </div>
+              <h1 className="font-serif font-black text-2xl sm:text-3xl text-[#1A1A1A] mt-1">
+                {user?.name || 'Fellow Correspondent'}
+              </h1>
+              <p className="font-mono text-xs text-[#8F8679] mt-0.5">
+                @{user?.username || user?.email?.split('@')[0]} · {user?.email}
+              </p>
+            </div>
+          </div>
 
-            <Footer />
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Link
+              to="/edit-profile"
+              className="ink-btn-ghost text-xs py-2 px-4 flex-1 sm:flex-none text-center"
+            >
+              ⚙ Edit Profile
+            </Link>
+            <Link
+              to="/write"
+              className="stamp-btn text-xs py-2 px-4 flex-1 sm:flex-none text-center"
+            >
+              ✍ New Dispatch
+            </Link>
+          </div>
+
         </div>
-    )
+
+        {/* Bio */}
+        {user?.bio && (
+          <p className="font-body text-sm text-[#3A3530] mt-4 leading-relaxed max-w-3xl">
+            "{user.bio}"
+          </p>
+        )}
+
+        {/* Correspondent Stats */}
+        <div className="grid grid-cols-3 gap-4 pt-6 mt-6 border-t border-[#DDD2C1] text-center">
+          <div>
+            <div className="font-serif font-bold text-2xl text-[#1A1A1A]">{posts.length}</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8F8679]">Published</div>
+          </div>
+          <div>
+            <div className="font-serif font-bold text-2xl text-[#7A1C2E]">{drafts.length}</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8F8679]">Drafts</div>
+          </div>
+          <div>
+            <div className="font-serif font-bold text-2xl text-[#C5A059]">{totalLikes}</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8F8679]">Total Endorsements</div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ─── TABBED ARCHIVES ──────────────────────────────── */}
+      <div>
+        <div className="flex items-center gap-4 border-b border-[#DDD2C1] mb-6">
+          <button
+            onClick={() => setActiveTab('published')}
+            className={`pb-3 text-sm font-mono tracking-wider uppercase border-b-2 transition-colors cursor-pointer ${
+              activeTab === 'published'
+                ? 'border-[#7A1C2E] text-[#7A1C2E] font-bold'
+                : 'border-transparent text-[#8F8679] hover:text-[#1A1A1A]'
+            }`}
+          >
+            Published Dispatches ({posts.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('drafts')}
+            className={`pb-3 text-sm font-mono tracking-wider uppercase border-b-2 transition-colors cursor-pointer ${
+              activeTab === 'drafts'
+                ? 'border-[#7A1C2E] text-[#7A1C2E] font-bold'
+                : 'border-transparent text-[#8F8679] hover:text-[#1A1A1A]'
+            }`}
+          >
+            Draft Manuscripts ({drafts.length})
+          </button>
+        </div>
+
+        {/* Tab Content: Published */}
+        {activeTab === 'published' && (
+          <div>
+            {loading ? (
+              <div className="py-16 text-center text-xs font-mono text-[#8F8679]">
+                Gathering dispatches…
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="paper-card p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE]">
+                <span className="text-4xl block mb-2 opacity-50">📰</span>
+                <h3 className="font-serif font-bold text-lg text-[#1A1A1A] mb-1">
+                  No published stories yet
+                </h3>
+                <p className="font-body text-xs text-[#6B6358] mb-4">
+                  Share your perspectives, reports, and reflections with the Gazette.
+                </p>
+                <Link to="/write" className="stamp-btn text-xs">
+                  Compose First Article
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {posts.map(post => (
+                  <BlogCard
+                    key={post.id}
+                    post={post}
+                    isOwner={true}
+                    onDelete={(id) => setPosts(prev => prev.filter(p => p.id !== id))}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab Content: Drafts */}
+        {activeTab === 'drafts' && (
+          <div>
+            {drafts.length === 0 ? (
+              <div className="paper-card p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE]">
+                <span className="text-4xl block mb-2 opacity-50">📝</span>
+                <h3 className="font-serif font-bold text-lg text-[#1A1A1A] mb-1">
+                  No pending drafts
+                </h3>
+                <p className="font-body text-xs text-[#6B6358] mb-4">
+                  All your thoughts have either been released to the press or not yet begun.
+                </p>
+                <Link to="/write" className="stamp-btn text-xs">
+                  Start a Draft
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {drafts.map(draft => (
+                  <div
+                    key={draft.id}
+                    className="paper-card p-5 bg-[#FAF6EE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#C5A059] border border-[#C5A059] px-1.5 py-0.5 rounded">
+                          Draft
+                        </span>
+                        <span className="text-xs font-mono text-[#8F8679]">
+                          {draft.genre || 'General'}
+                        </span>
+                      </div>
+                      <h4 className="font-serif font-bold text-lg text-[#1A1A1A]">
+                        {draft.title || 'Untitled Manuscript'}
+                      </h4>
+                      <p className="font-body text-xs text-[#6B6358] line-clamp-1 mt-1">
+                        {draft.content?.replace(/<[^>]+>/g, '') || 'No content yet…'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => navigate(`/write?edit=${draft.id}`)}
+                        className="ink-btn-ghost text-xs py-1.5 px-3"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handlePublish(draft.id)}
+                        className="stamp-btn text-xs py-1.5 px-3"
+                      >
+                        Publish
+                      </button>
+                      <button
+                        onClick={() => handleDeleteDraft(draft.id)}
+                        className="text-xs font-mono text-[#7A1C2E] hover:underline px-2"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+      </div>
+
+    </div>
+  )
 }

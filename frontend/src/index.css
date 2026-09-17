@@ -1,27 +1,29 @@
 /* ============================================================
-   IdeaPad — Vintage Newspaper Design System
+   IdeaPad — The Independent Voice of Ideas
+   Premium Editorial Design System
    ============================================================ */
 
-/* Google Fonts — Editorial & Typewriter Stack */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600;1,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Special+Elite&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
 /* ─── Design Tokens ──────────────────────────────────────── */
 @theme {
-  --color-paper:     #F5EAD7;
-  --color-parchment: #EADCC5;
-  --color-sepia:     #8B5A2B;
-  --color-ink:       #1F1B16;
-  --color-burgundy:  #7A2E2E;
-  --color-gold:      #B08968;
-  --color-cream:     #FAF6EE;
-  --color-muted:     #7A6A52;
+  --color-paper:        #F7F1E8;
+  --color-parchment:    #FAF6EE;
+  --color-parchment-2:  #EFE8DC;
+  --color-ink:          #1A1A1A;
+  --color-ink-light:    #3A3530;
+  --color-ink-muted:    #6B6358;
+  --color-burgundy:     #7A1C2E;
+  --color-burgundy-dark:#5C1321;
+  --color-gold:         #C5A059;
+  --color-gold-dark:    #A68037;
+  --color-border:       #DDD2C1;
+  --color-border-dark:  #C8B89A;
 
-  --font-heading:    "Playfair Display", "Cormorant Garamond", serif;
+  --font-headline:   "Playfair Display", "Times New Roman", serif;
   --font-body:       "IBM Plex Serif", "Crimson Text", serif;
   --font-typewriter: "Special Elite", monospace;
-  --font-sans:       "IBM Plex Serif", serif;
 }
 
 /* ─── Global Base ─────────────────────────────────────────── */
@@ -32,48 +34,64 @@
 
   html {
     scroll-behavior: smooth;
+    background-color: #F7F1E8;
   }
 
   body {
-    background-color: #F5EAD7;
-    color: #1F1B16;
+    background-color: #F7F1E8;
+    color: #1A1A1A;
     font-family: "IBM Plex Serif", "Crimson Text", serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* Vintage newsprint paper fiber texture */
     background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 300px 300px;
-    cursor: url('/cursor.svg') 6 0, crosshair;
+      radial-gradient(#1A1A1A 0.4px, transparent 0.4px),
+      radial-gradient(#C5A059 0.3px, #F7F1E8 0.3px);
+    background-size: 32px 32px;
+    background-position: 0 0, 16px 16px;
+    background-color: #F7F1E8;
+    cursor: url('/cursor.svg') 2 2, auto;
   }
 
-  /* Interactive elements — pen cursor rotates on hover */
-  a, button, [role="button"] {
-    cursor: url('/cursor.svg') 6 0, pointer;
+  /* Fountain pen nib cursor on interactive items */
+  a, button, [role="button"], input, select, textarea, label {
+    cursor: url('/cursor.svg') 2 2, pointer;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Playfair Display", "Cormorant Garamond", serif;
-    color: #1F1B16;
+    font-family: "Playfair Display", serif;
+    color: #1A1A1A;
+    letter-spacing: -0.015em;
   }
 
   p, span, li, td, label {
-    font-family: "IBM Plex Serif", "Crimson Text", serif;
+    font-family: "IBM Plex Serif", serif;
   }
 
   ::selection {
-    background: #8B5A2B33;
-    color: #1F1B16;
+    background: rgba(122, 28, 46, 0.2);
+    color: #1A1A1A;
   }
 }
 
 /* ─── Custom Scrollbar ─────────────────────────────────────── */
-::-webkit-scrollbar { width: 7px; height: 7px; }
-::-webkit-scrollbar-track { background: #EADCC5; }
-::-webkit-scrollbar-thumb { background: #8B5A2B; border-radius: 0; }
-::-webkit-scrollbar-thumb:hover { background: #7A2E2E; }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #EFE8DC;
+}
+::-webkit-scrollbar-thumb {
+  background: #C8B89A;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7A1C2E;
+}
 
 /* ─── Reading Progress Bar ─────────────────────────────────── */
 #reading-progress {
@@ -81,405 +99,442 @@
   top: 0;
   left: 0;
   height: 3px;
-  background: #7A2E2E;
-  z-index: 9999;
+  background: linear-gradient(90deg, #7A1C2E, #C5A059);
+  z-index: 99999;
   transition: width 0.1s linear;
 }
 
-/* ─── Utilities ────────────────────────────────────────────── */
+/* ─── Utilities & Components ───────────────────────────────── */
 @layer utilities {
 
-  /* Paper card — newspaper clipping */
+  /* Paper Card — tactile editorial card */
   .paper-card {
     background: #FAF6EE;
-    border: 1px solid #C8B89A;
-    box-shadow: 2px 3px 10px rgba(31,27,22,0.10), 0 1px 3px rgba(31,27,22,0.07);
-    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    border: 1px solid #DDD2C1;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(26, 26, 26, 0.04), 0 1px 2px rgba(26, 26, 26, 0.03);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .paper-card:hover {
-    transform: translateY(-3px) rotate(0.15deg);
-    box-shadow: 4px 8px 24px rgba(31,27,22,0.15);
+    transform: translateY(-3px);
+    border-color: #C8B89A;
+    box-shadow: 0 10px 25px rgba(26, 26, 26, 0.08), 0 3px 6px rgba(26, 26, 26, 0.04);
   }
 
-  /* Masthead header */
-  .masthead {
-    background: #1F1B16;
-    color: #F5EAD7;
-    border-bottom: 3px solid #8B5A2B;
+  /* Paper Card Subtle — for sidebar / background blocks */
+  .paper-subtle {
+    background: #EFE8DC;
+    border: 1px solid #DDD2C1;
+    border-radius: 6px;
   }
 
-  /* Ink button — solid stamp style */
-  .ink-btn {
-    background: #1F1B16;
-    color: #F5EAD7;
+  /* Stamp Button — Burgundy Vintage Newspaper Stamp */
+  .stamp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #7A1C2E;
+    color: #FAF6EE;
     font-family: "Special Elite", monospace;
-    border: 2px solid #1F1B16;
-    letter-spacing: 0.08em;
-    padding: 0.45rem 1.25rem;
-    transition: background 0.2s, color 0.2s, transform 0.1s;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    font-size: 0.8rem;
+    padding: 0.55rem 1.35rem;
+    border-radius: 4px;
+    border: 1.5px solid #5C1321;
+    box-shadow: 0 2px 4px rgba(122, 28, 46, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    user-select: none;
+  }
+  .stamp-btn:hover {
+    background: #8F2236;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(122, 28, 46, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: #7A1C2E;
+  }
+  .stamp-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(122, 28, 46, 0.2);
+  }
+
+  /* Ink Button — Solid Dark Ink */
+  .ink-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #1A1A1A;
+    color: #FAF6EE;
+    font-family: "Special Elite", monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.35rem;
+    border-radius: 4px;
+    border: 1.5px solid #1A1A1A;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .ink-btn:hover {
-    background: #7A2E2E;
-    border-color: #7A2E2E;
-    color: #F5EAD7;
+    background: #7A1C2E;
+    border-color: #7A1C2E;
+    color: #FAF6EE;
     transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(122, 28, 46, 0.25);
   }
   .ink-btn:active {
     transform: translateY(1px);
   }
 
-  /* Ghost ink button — outlined */
+  /* Ink Button Ghost — Outlined Paper Button */
   .ink-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     background: transparent;
-    color: #8B5A2B;
+    color: #1A1A1A;
     font-family: "Special Elite", monospace;
-    border: 1.5px solid #8B5A2B;
-    letter-spacing: 0.08em;
-    padding: 0.45rem 1.25rem;
-    transition: background 0.2s, color 0.2s, transform 0.1s;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    font-size: 0.8rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 4px;
+    border: 1.5px solid #C8B89A;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .ink-btn-ghost:hover {
-    background: #8B5A2B;
-    color: #F5EAD7;
+    background: #EFE8DC;
+    border-color: #7A1C2E;
+    color: #7A1C2E;
     transform: translateY(-1px);
   }
 
-  /* Stamp button — burgundy */
-  .stamp-btn {
-    background: #7A2E2E;
-    color: #FAF6EE;
+  /* Gold Badge Button */
+  .gold-badge {
+    background: #FAF6EE;
+    color: #8C6D2B;
+    border: 1px solid #C5A059;
     font-family: "Special Elite", monospace;
-    border: 2px solid #5C1F1F;
-    border-radius: 2px;
-    letter-spacing: 0.1em;
-    padding: 0.5rem 1.4rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    font-size: 0.78rem;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 2px 3px 6px rgba(122,46,46,0.3);
-    transition: all 0.15s;
-    position: relative;
+    padding: 0.25rem 0.75rem;
+    border-radius: 3px;
+    transition: all 0.2s;
   }
-  .stamp-btn:hover {
-    background: #8B3535;
-    transform: translateY(-1px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 3px 5px 10px rgba(122,46,46,0.35);
-  }
-  .stamp-btn:active {
-    transform: translateY(2px) scale(0.98);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+  .gold-badge:hover {
+    background: #C5A059;
+    color: #FAF6EE;
   }
 
-  /* Ink input */
+  /* Ink Underline Link */
+  .ink-link {
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s;
+  }
+  .ink-link::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background: #7A1C2E;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ink-link:hover {
+    color: #7A1C2E;
+  }
+  .ink-link:hover::after {
+    width: 100%;
+  }
+
+  /* Input fields */
   .ink-input {
     background: #FAF6EE;
-    border: 1.5px solid #C8B89A;
-    border-radius: 2px;
-    color: #1F1B16;
+    border: 1.5px solid #DDD2C1;
+    border-radius: 6px;
+    color: #1A1A1A;
     font-family: "IBM Plex Serif", serif;
-    padding: 0.6rem 0.9rem;
+    padding: 0.65rem 1rem;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: all 0.2s;
     font-size: 0.95rem;
   }
   .ink-input::placeholder {
     font-family: "Special Elite", monospace;
-    color: #B08968;
+    color: #8F8679;
     font-size: 0.85rem;
   }
   .ink-input:focus {
-    border-color: #8B5A2B;
-    box-shadow: 0 0 0 3px rgba(139,90,43,0.12);
-  }
-  .ink-input:focus-within {
-    border-color: #8B5A2B;
+    border-color: #7A1C2E;
+    box-shadow: 0 0 0 3px rgba(122, 28, 46, 0.12);
+    background: #FFFDF9;
   }
 
-  /* Ink select */
-  .ink-select {
-    background: #FAF6EE;
-    border: 1.5px solid #C8B89A;
-    border-radius: 2px;
-    color: #1F1B16;
-    font-family: "IBM Plex Serif", serif;
-    padding: 0.6rem 0.9rem;
-    outline: none;
-    transition: border-color 0.2s;
-    font-size: 0.95rem;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238B5A2B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.8rem center;
-    padding-right: 2.5rem;
-  }
-  .ink-select:focus {
-    border-color: #8B5A2B;
-    box-shadow: 0 0 0 3px rgba(139,90,43,0.12);
-  }
-
-  /* Vintage horizontal divider */
+  /* Vintage Newspaper Rules */
   .vintage-rule {
     border: none;
-    border-top: 1px solid #C8B89A;
-    position: relative;
-    margin: 1.5rem 0;
+    border-top: 1px solid #DDD2C1;
+    margin: 1.25rem 0;
   }
   .vintage-rule-double {
     border: none;
     height: 5px;
-    border-top: 1px solid #1F1B16;
-    border-bottom: 1px solid #1F1B16;
-    box-sizing: content-box;
+    border-top: 1px solid #1A1A1A;
+    border-bottom: 1px solid #1A1A1A;
+    margin: 1.5rem 0;
   }
   .vintage-rule-thick {
     border: none;
-    height: 2px;
-    background: #1F1B16;
-    margin: 0.5rem 0;
+    height: 2.5px;
+    background: #1A1A1A;
+    margin: 0.75rem 0;
   }
 
-  /* Genre badge — newspaper label */
-  .genre-label {
-    font-family: "Special Elite", monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    padding: 0.2rem 0.7rem;
-    border: 1px solid currentColor;
-    border-radius: 1px;
-    display: inline-block;
-  }
-
-  /* Drop cap for first paragraph */
-  .drop-cap::first-letter {
-    font-family: "Playfair Display", serif;
-    font-size: 4.5rem;
-    font-weight: 700;
-    float: left;
-    line-height: 0.75;
-    margin-right: 0.1em;
-    margin-top: 0.07em;
-    color: #7A2E2E;
-  }
-
-  /* Typewriter text */
-  .typewriter-text {
-    font-family: "Special Elite", monospace;
-  }
-
-  /* Drop cap letter — for PostDetail first letter */
+  /* Drop Cap initial letter */
   .drop-cap-letter {
     font-family: "Playfair Display", serif;
-    font-size: 4.5rem;
-    font-weight: 700;
+    font-size: 4.8rem;
+    font-weight: 800;
     float: left;
     line-height: 0.75;
-    margin-right: 0.1em;
-    margin-top: 0.07em;
-    color: #7A2E2E;
+    margin-right: 0.15em;
+    margin-top: 0.08em;
+    color: #7A1C2E;
+    text-shadow: 1px 1px 0 rgba(197, 160, 89, 0.3);
   }
 
-  /* Newspaper column layout */
-  .news-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0;
+  /* Editorial image frame with sepia hover */
+  .editorial-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid #DDD2C1;
+    background: #EFE8DC;
   }
-  @media (min-width: 768px) {
-    .news-grid {
-      grid-template-columns: 2fr 1fr;
-    }
+  .editorial-frame img {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+    filter: sepia(0.12) contrast(1.02);
   }
-
-  /* Vertical column rule */
-  .col-rule {
-    border-left: 1px solid #C8B89A;
-    padding-left: 1.5rem;
-    margin-left: 1.5rem;
+  .editorial-frame:hover img {
+    transform: scale(1.03);
+    filter: sepia(0.28) contrast(1.06);
   }
 
-  /* Sepia image effect */
-  .editorial-img {
-    filter: sepia(0.2) contrast(1.05);
-    border: 1px solid #C8B89A;
-    box-shadow: 2px 2px 8px rgba(31,27,22,0.15);
-    transition: filter 0.3s;
-  }
-  .editorial-img:hover {
-    filter: sepia(0.5) contrast(1.08);
-  }
-
-  /* Torn paper edge — top */
-  .torn-top::before {
-    content: '';
-    display: block;
-    height: 12px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10'%3E%3Cpath d='M0,5 C5,0 10,10 15,5 C20,0 25,10 30,5 C35,0 40,10 45,5 C50,0 55,10 60,5 C65,0 70,10 75,5 C80,0 85,10 90,5 C95,0 100,10 100,5 L100,10 L0,10 Z' fill='%23F5EAD7'/%3E%3C/svg%3E") repeat-x bottom;
-    background-size: 100px 12px;
-    margin-bottom: -1px;
-  }
-
-  /* Breaking news ticker */
-  .ticker-text {
-    animation: ticker-scroll 20s linear infinite;
-    white-space: nowrap;
-    display: inline-block;
-  }
-  @keyframes ticker-scroll {
-    0%   { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
-  }
-
-  /* Ink reveal animation */
-  .ink-reveal {
-    animation: inkReveal 0.6s ease forwards;
-  }
-  @keyframes inkReveal {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Paper slide in */
-  .paper-slide {
-    animation: paperSlide 0.5s ease forwards;
-  }
-  @keyframes paperSlide {
-    from { opacity: 0; transform: translateX(-20px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-
-  /* Fade in */
-  .fade-in {
-    animation: fadeIn 0.5s ease forwards;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-
-  /* Loading ink spinner */
-  .ink-spinner {
-    width: 36px; height: 36px;
-    border: 3px solid #C8B89A;
-    border-top-color: #7A2E2E;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* Quote block */
-  .vintage-quote {
-    border-left: 3px solid #7A2E2E;
-    padding: 0.75rem 1.25rem;
-    background: #EADCC5;
+  /* Editorial captions */
+  .editorial-caption {
+    font-family: "Special Elite", monospace;
+    font-size: 0.75rem;
+    color: #6B6358;
+    text-align: center;
+    margin-top: 0.5rem;
     font-style: italic;
-    font-family: "Cormorant Garamond", serif;
-    font-size: 1.15rem;
-    color: #1F1B16;
-    margin: 1.5rem 0;
+    letter-spacing: 0.04em;
   }
 
-  /* Author byline */
+  /* Byline typography */
   .byline {
     font-family: "Special Elite", monospace;
     font-size: 0.75rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #8B5A2B;
+    color: #6B6358;
   }
 
   /* Section header */
   .section-header {
-    font-family: "Playfair Display", serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.25em;
+    font-family: "Special Elite", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #7A2E2E;
-    border-bottom: 2px solid #1F1B16;
-    padding-bottom: 0.35rem;
-    margin-bottom: 1rem;
+    color: #7A1C2E;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #DDD2C1;
+  }
+
+  /* Category badge */
+  .genre-badge {
+    font-family: "Special Elite", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.65rem;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+    background: rgba(247, 241, 232, 0.85);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  /* Ink ripple animation on click */
+  .ink-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  .ink-ripple::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #7A1C2E 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform 0.5s, opacity 1s;
+  }
+  .ink-ripple:active::after {
+    transform: scale(0, 0);
+    opacity: 0.25;
+    transition: 0s;
   }
 }
 
-/* ─── Prose Override for PostDetail ─────────────────────────── */
+/* ─── Long-form Editorial Prose (PostDetail) ───────────────── */
 .vintage-prose {
   font-family: "IBM Plex Serif", "Crimson Text", serif;
-  color: #2A2520;
-  font-size: 1.05rem;
-  line-height: 1.85;
+  color: #24201C;
+  font-size: 1.125rem;
+  line-height: 1.95;
+}
+.vintage-prose p {
+  margin-bottom: 1.65rem;
+  text-align: justify;
 }
 .vintage-prose h1, .vintage-prose h2, .vintage-prose h3 {
   font-family: "Playfair Display", serif;
-  color: #1F1B16;
-  border-bottom: 1px solid #C8B89A;
-  padding-bottom: 0.3rem;
-  margin-top: 1.8rem;
+  color: #1A1A1A;
+  font-weight: 700;
+  margin-top: 2.4rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+.vintage-prose h2 {
+  font-size: 1.75rem;
+  border-bottom: 1px solid #DDD2C1;
+  padding-bottom: 0.5rem;
+}
+.vintage-prose h3 {
+  font-size: 1.35rem;
 }
 .vintage-prose blockquote {
-  border-left: 3px solid #7A2E2E;
-  padding: 0.5rem 1rem;
-  background: #EADCC5;
+  font-family: "Crimson Text", serif;
   font-style: italic;
-  font-family: "Cormorant Garamond", serif;
-  font-size: 1.15rem;
-  color: #1F1B16;
+  font-size: 1.35rem;
+  line-height: 1.6;
+  border-left: 3px solid #7A1C2E;
+  padding: 1rem 1.5rem;
+  margin: 2rem 0;
+  background: #FAF6EE;
+  border-radius: 0 8px 8px 0;
+  color: #1A1A1A;
 }
 .vintage-prose a {
-  color: #7A2E2E;
+  color: #7A1C2E;
   text-decoration: underline;
-  text-decoration-color: #B08968;
+  text-decoration-color: #C5A059;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+.vintage-prose a:hover {
+  color: #1A1A1A;
 }
 .vintage-prose strong {
-  color: #1F1B16;
+  color: #1A1A1A;
   font-weight: 700;
 }
-.vintage-prose code {
-  font-family: "Special Elite", monospace;
-  background: #EADCC5;
-  padding: 0.1em 0.35em;
-  border-radius: 2px;
-  font-size: 0.88em;
+.vintage-prose ul, .vintage-prose ol {
+  margin: 1.25rem 0 1.65rem 1.75rem;
+}
+.vintage-prose li {
+  margin-bottom: 0.5rem;
 }
 
-/* ─── TipTap Editor Vintage Override ─────────────────────── */
+/* ─── TipTap Editor Vintage Style ─────────────────────────── */
 .tiptap-vintage .tiptap-editor .ProseMirror {
   font-family: "IBM Plex Serif", serif;
-  color: #1F1B16;
+  color: #1A1A1A;
   background: #FAF6EE;
   outline: none;
-  padding: 1.5rem;
-  min-height: 400px;
-  font-size: 1.05rem;
+  padding: 1.75rem;
+  min-height: 440px;
+  font-size: 1.1rem;
   line-height: 1.85;
-  border: 1.5px solid #C8B89A;
+  border: 1.5px solid #DDD2C1;
+  border-radius: 8px;
 }
 .tiptap-vintage .tiptap-editor .ProseMirror:focus {
-  border-color: #8B5A2B;
+  border-color: #7A1C2E;
+  box-shadow: 0 0 0 3px rgba(122, 28, 46, 0.1);
 }
 .tiptap-vintage .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   font-family: "Special Elite", monospace;
-  color: #B08968;
+  color: #8F8679;
   float: left;
   pointer-events: none;
   height: 0;
 }
 
-/* ─── Genre Color Map ─────────────────────────────────────── */
-.genre-Technology  { color: #3B5998; border-color: #3B5998; }
-.genre-Travel      { color: #2E7D52; border-color: #2E7D52; }
-.genre-Food        { color: #8B4513; border-color: #8B4513; }
-.genre-Lifestyle   { color: #7A2E2E; border-color: #7A2E2E; }
-.genre-Fiction     { color: #4A3278; border-color: #4A3278; }
-.genre-Opinion     { color: #1F1B16; border-color: #1F1B16; }
-.genre-Health      { color: #2C6B4F; border-color: #2C6B4F; }
-.genre-Finance     { color: #5A4000; border-color: #5A4000; }
-.genre-Gaming      { color: #3C3C8C; border-color: #3C3C8C; }
-.genre-Culture     { color: #8B3A3A; border-color: #8B3A3A; }
-.genre-Else        { color: #5C4A2A; border-color: #5C4A2A; }
-.genre-All         { color: #1F1B16; border-color: #1F1B16; }
+/* ─── Animations ───────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes paperSlide {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.paper-slide {
+  animation: paperSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── Ticker Animation ─────────────────────────────────────── */
+.ticker-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ticker-scroll 24s linear infinite;
+}
+.ticker-text:hover {
+  animation-play-state: paused;
+}
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Genre Colors ─────────────────────────────────────────── */
+.genre-Technology { color: #2B578C; border-color: #2B578C; }
+.genre-Travel     { color: #2D6A4F; border-color: #2D6A4F; }
+.genre-Food       { color: #8F5222; border-color: #8F5222; }
+.genre-Lifestyle  { color: #7A1C2E; border-color: #7A1C2E; }
+.genre-Fiction    { color: #5B3A82; border-color: #5B3A82; }
+.genre-Opinion    { color: #1A1A1A; border-color: #1A1A1A; }
+.genre-Health     { color: #1B6A56; border-color: #1B6A56; }
+.genre-Finance    { color: #735914; border-color: #735914; }
+.genre-Gaming     { color: #4338CA; border-color: #4338CA; }
+.genre-Culture    { color: #802E42; border-color: #802E42; }
+.genre-Else       { color: #6B5C45; border-color: #6B5C45; }
+.genre-All        { color: #1A1A1A; border-color: #1A1A1A; }
