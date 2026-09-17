@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import { createPost, updatePost, getPostById } from '../services/postService'
 import { useAuth } from '../context/AuthContext'
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -15,16 +16,22 @@ const genres = [
     'Gaming', 'Culture', 'Sports', 'Else'
 ]
 
+// Vintage toolbar button
 const ToolbarButton = ({ onClick, active, title, children }) => (
     <button
         type="button"
         onClick={onClick}
         title={title}
-        className={`px-2.5 py-1.5 rounded-lg text-sm font-medium transition-all
-            ${active
-                ? 'bg-indigo-500/40 text-indigo-300 border border-indigo-500/50'
-                : 'text-slate-400 hover:text-white hover:bg-slate-700/50 border border-transparent'
-            }`}>
+        className="text-xs px-2 py-1 transition-all"
+        style={{
+            fontFamily: "'Special Elite', monospace",
+            background: active ? '#1F1B16' : 'transparent',
+            color: active ? '#F5EAD7' : '#8B5A2B',
+            border: `1px solid ${active ? '#1F1B16' : '#C8B89A'}`,
+            borderRadius: '1px',
+            cursor: 'pointer',
+        }}
+    >
         {children}
     </button>
 )
@@ -45,21 +52,17 @@ export default function WritePost() {
 
     const editor = useEditor({
         extensions: [
-            StarterKit.configure({
-                underline: false
-            }),
+            StarterKit.configure({ underline: false }),
             Underline,
-            TextAlign.configure({
-                types: ['heading', 'paragraph']
-            }),
+            TextAlign.configure({ types: ['heading', 'paragraph'] }),
             Placeholder.configure({
-                placeholder: 'Write your story here...'
+                placeholder: 'Begin your dispatch here…'
             })
         ],
         content: '',
         editorProps: {
             attributes: {
-                class: 'prose prose-invert max-w-none focus:outline-none min-h-[300px] text-slate-200 leading-relaxed'
+                class: 'prose max-w-none focus:outline-none min-h-[340px] leading-relaxed vintage-prose'
             }
         }
     })
@@ -72,37 +75,24 @@ export default function WritePost() {
     const loadPost = async () => {
         try {
             const data = await getPostById(editId)
-            setForm({
-                title: data.title,
-                genre: data.genre,
-                status: data.status,
-            })
+            setForm({ title: data.title, genre: data.genre, status: data.status })
             if (editor && data.content) {
                 editor.commands.setContent(data.content)
             }
-        } catch (err) {
-            console.error(err)
-        }
+        } catch (err) { console.error(err) }
     }
 
     useEffect(() => {
-        if (editor && editId) {
-            loadPost()
-        }
+        if (editor && editId) loadPost()
     }, [editor])
 
     const handleChange = (e) => {
-        const value = e.target.type === 'checkbox'
-            ? e.target.checked
-            : e.target.value
+        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
         setForm({ ...form, [e.target.name]: value })
     }
 
     const getContent = useCallback(() => {
-        if (editor) {
-            return editor.getHTML()
-        }
-        return ''
+        return editor ? editor.getHTML() : ''
     }, [editor])
 
     const handleSaveDraft = async () => {
@@ -115,8 +105,8 @@ export default function WritePost() {
                 await createPost({ ...form, content, status: 'draft' })
             }
             navigate('/')
-        } catch (err) {
-            setError('Failed to save draft')
+        } catch {
+            setError('Failed to save draft. Please try again.')
         } finally {
             setLoading(false)
         }
@@ -133,34 +123,44 @@ export default function WritePost() {
                 await createPost({ ...form, content })
             }
             navigate('/')
-        } catch (err) {
-            setError('Failed to publish post')
+        } catch {
+            setError('Failed to publish post. Please try again.')
         } finally {
             setLoading(false)
         }
     }
 
     return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="max-w-4xl mx-auto px-6 py-10 animate-fade-in">
-                <div className="glass p-8 md:p-12 rounded-3xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 opacity-90"></div>
 
-                    <button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="absolute top-6 right-6 md:top-8 md:right-8 text-slate-400 hover:text-white transition bg-slate-800/50 hover:bg-slate-700 rounded-full w-10 h-10 flex items-center justify-center border border-white/10">
-                        ✕
-                    </button>
-
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-8 tracking-tight">
-                        {editId ? 'Edit Post' : 'Write a Story'}
-                    </h1>
+            <main className="flex-1 max-w-4xl mx-auto px-4 md:px-6 py-10 w-full">
+                <div className="paper-card p-6 md:p-10 ink-reveal">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-8">
+                        <div>
+                            <div className="vintage-rule-double mb-4" style={{ maxWidth: '200px' }}></div>
+                            <h1
+                                className="text-3xl font-black text-[#1F1B16]"
+                                style={{ fontFamily: "'Playfair Display', serif" }}
+                            >
+                                {editId ? 'Edit Your Dispatch' : 'Write a New Dispatch'}
+                            </h1>
+                            <p className="byline mt-1">Compose your article for the press</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="ink-btn-ghost text-xs px-3 py-2"
+                        >
+                            ← Back
+                        </button>
+                    </div>
 
                     {error && (
-                        <div className="bg-red-50/80 border border-red-200 text-red-600 p-4 rounded-xl mb-8 flex items-center gap-3 font-medium">
-                            <span className="text-xl">⚠️</span> {error}
+                        <div className="border border-[#7A2E2E] bg-[#FBF0F0] text-[#7A2E2E] p-4 mb-6 text-sm flex items-center gap-3">
+                            <span>⚠</span>
+                            <span style={{ fontFamily: "'IBM Plex Serif', serif" }}>{error}</span>
                         </div>
                     )}
 
@@ -168,176 +168,114 @@ export default function WritePost() {
 
                         {/* Title */}
                         <div>
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Title
-                            </label>
+                            <label className="byline block mb-2">Headline</label>
                             <input
                                 type="text"
                                 name="title"
                                 value={form.title}
                                 onChange={handleChange}
                                 required
-                                placeholder="Enter a captivating title..."
-                                className="w-full glass-input text-lg py-3"
+                                placeholder="Enter a captivating headline…"
+                                className="ink-input w-full text-lg"
+                                style={{ fontFamily: "'Playfair Display', serif", fontWeight: '700' }}
                             />
                         </div>
 
                         {/* Genre */}
                         <div>
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Genre
-                            </label>
+                            <label className="byline block mb-2">Section / Genre</label>
                             <select
                                 name="genre"
                                 value={form.genre}
                                 onChange={handleChange}
-                                className="w-full glass-input py-3 cursor-pointer [&>option]:bg-slate-800">
+                                className="ink-select w-full max-w-xs"
+                            >
                                 {genres.map(g => (
                                     <option key={g} value={g}>{g}</option>
                                 ))}
                             </select>
                         </div>
 
-                        {/* TipTap Editor */}
+                        {/* TipTap Editor — vintage typewriter style */}
                         <div>
-                            <label className="text-sm font-semibold text-slate-300 mb-2 block">
-                                Content
-                            </label>
+                            <label className="byline block mb-2">Article Body</label>
 
-                            {/* Toolbar */}
-                            <div className="flex flex-wrap gap-1 p-2 bg-slate-800/80 border border-white/10 rounded-t-xl border-b-0">
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleBold().run()}
-                                    active={editor?.isActive('bold')}
-                                    title="Bold">
+                            {/* Vintage toolbar */}
+                            <div
+                                className="flex flex-wrap gap-1 p-2 border border-[#C8B89A] border-b-0"
+                                style={{ background: '#EADCC5' }}
+                            >
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')} title="Bold">
                                     <b>B</b>
                                 </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleItalic().run()}
-                                    active={editor?.isActive('italic')}
-                                    title="Italic">
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive('italic')} title="Italic">
                                     <i>I</i>
                                 </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleUnderline().run()}
-                                    active={editor?.isActive('underline')}
-                                    title="Underline">
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleUnderline().run()} active={editor?.isActive('underline')} title="Underline">
                                     <u>U</u>
                                 </ToolbarButton>
 
-                                <div className="w-px bg-white/10 mx-1" />
+                                <span className="w-px bg-[#C8B89A] mx-1 self-stretch"></span>
 
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                                    active={editor?.isActive('heading', { level: 1 })}
-                                    title="Heading 1">
-                                    H1
-                                </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                                    active={editor?.isActive('heading', { level: 2 })}
-                                    title="Heading 2">
-                                    H2
-                                </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                                    active={editor?.isActive('heading', { level: 3 })}
-                                    title="Heading 3">
-                                    H3
-                                </ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} active={editor?.isActive('heading', { level: 1 })} title="Heading 1">H1</ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} active={editor?.isActive('heading', { level: 2 })} title="Heading 2">H2</ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()} active={editor?.isActive('heading', { level: 3 })} title="Heading 3">H3</ToolbarButton>
 
-                                <div className="w-px bg-white/10 mx-1" />
+                                <span className="w-px bg-[#C8B89A] mx-1 self-stretch"></span>
 
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleBulletList().run()}
-                                    active={editor?.isActive('bulletList')}
-                                    title="Bullet List">
-                                    • List
-                                </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                                    active={editor?.isActive('orderedList')}
-                                    title="Numbered List">
-                                    1. List
-                                </ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleBulletList().run()} active={editor?.isActive('bulletList')} title="Bullet List">• List</ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleOrderedList().run()} active={editor?.isActive('orderedList')} title="Ordered List">1. List</ToolbarButton>
 
-                                <div className="w-px bg-white/10 mx-1" />
+                                <span className="w-px bg-[#C8B89A] mx-1 self-stretch"></span>
 
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                                    active={editor?.isActive('blockquote')}
-                                    title="Quote">
-                                    ❝ Quote
-                                </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                                    active={editor?.isActive('codeBlock')}
-                                    title="Code Block">
-                                    {'</>'}
-                                </ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleBlockquote().run()} active={editor?.isActive('blockquote')} title="Quote">❝ Quote</ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().toggleCodeBlock().run()} active={editor?.isActive('codeBlock')} title="Code">&lt;/&gt;</ToolbarButton>
 
-                                <div className="w-px bg-white/10 mx-1" />
+                                <span className="w-px bg-[#C8B89A] mx-1 self-stretch"></span>
 
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                                    active={editor?.isActive({ textAlign: 'left' })}
-                                    title="Align Left">
-                                    ←
-                                </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                                    active={editor?.isActive({ textAlign: 'center' })}
-                                    title="Align Center">
-                                    ↔
-                                </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                                    active={editor?.isActive({ textAlign: 'right' })}
-                                    title="Align Right">
-                                    →
-                                </ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign('left').run()} active={editor?.isActive({ textAlign: 'left' })} title="Left">←</ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign('center').run()} active={editor?.isActive({ textAlign: 'center' })} title="Center">↔</ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().setTextAlign('right').run()} active={editor?.isActive({ textAlign: 'right' })} title="Right">→</ToolbarButton>
 
-                                <div className="w-px bg-white/10 mx-1" />
+                                <span className="w-px bg-[#C8B89A] mx-1 self-stretch"></span>
 
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().undo().run()}
-                                    title="Undo">
-                                    ↩
-                                </ToolbarButton>
-                                <ToolbarButton
-                                    onClick={() => editor.chain().focus().redo().run()}
-                                    title="Redo">
-                                    ↪
-                                </ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().undo().run()} title="Undo">↩</ToolbarButton>
+                                <ToolbarButton onClick={() => editor?.chain().focus().redo().run()} title="Redo">↪</ToolbarButton>
                             </div>
 
-                            {/* Editor Area */}
-                            <div className="glass-input rounded-t-none rounded-b-xl p-4 min-h-[300px]">
+                            {/* Editor content area */}
+                            <div
+                                className="border border-[#C8B89A] p-5 min-h-[340px]"
+                                style={{ background: '#FAF6EE', fontFamily: "'IBM Plex Serif', serif", lineHeight: '1.9' }}
+                                onClick={() => editor?.commands.focus()}
+                            >
                                 <EditorContent editor={editor} />
                             </div>
                         </div>
 
-
-
-                        {/* Buttons */}
-                        <div className="flex flex-wrap gap-4 mt-4 pt-6 border-t border-white/10">
+                        {/* Action buttons */}
+                        <div className="flex flex-wrap gap-3 mt-4 pt-6 border-t border-[#C8B89A]">
                             <button
                                 type="button"
                                 onClick={handleSaveDraft}
                                 disabled={loading}
-                                className="btn-glass px-8 py-3 text-base">
-                                Save as Draft
+                                className="ink-btn-ghost text-xs px-8 py-3"
+                            >
+                                Save to Drafts
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="btn-gradient px-8 py-3 text-base">
-                                {loading ? 'Publishing...' : editId ? 'Update Post' : 'Publish Post'}
+                                className="stamp-btn text-xs px-8 py-3 tracking-widest"
+                            >
+                                {loading ? 'Sending to Press…' : editId ? '✦ Update Article' : '✦ Publish to Press'}
                             </button>
                         </div>
                     </form>
                 </div>
-            </div>
+            </main>
+
+            <Footer />
         </div>
     )
 }

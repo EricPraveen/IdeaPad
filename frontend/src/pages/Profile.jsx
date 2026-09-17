@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import BlogCard from '../components/BlogCard'
 import { useAuth } from '../context/AuthContext'
 import { getPostsByUserId, getDrafts, publishPost, deletePost } from '../services/postService'
@@ -17,13 +18,8 @@ export default function Profile() {
         if (!user) {
             navigate('/login')
         } else {
-            // Verify token exists before making requests
             const token = localStorage.getItem('token')
-            if (!token) {
-                console.error('Token not found - redirecting to login')
-                navigate('/login')
-                return
-            }
+            if (!token) { navigate('/login'); return }
             loadPosts()
             loadDrafts()
         }
@@ -47,7 +43,6 @@ export default function Profile() {
         } catch (err) {
             console.error('Error loading drafts:', err)
             if (err.response?.status === 401 || err.response?.status === 403) {
-                console.error('Authentication failed. Please login again.')
                 navigate('/login')
             }
         }
@@ -62,95 +57,114 @@ export default function Profile() {
             alert('Post published successfully!')
         } catch (err) {
             console.error(err)
-            alert('Failed to publish post: ' + err.message)
+            alert('Failed to publish: ' + err.message)
         }
     }
 
     const handleDeleteDraft = async (id) => {
-        if (!window.confirm('Delete this draft?')) return
+        if (!window.confirm('Delete this draft from the archives?')) return
         try {
             await deletePost(id)
             setDrafts(drafts.filter(d => d.id !== id))
-        } catch (err) {
-            console.error(err)
-        }
+        } catch (err) { console.error(err) }
     }
 
     return (
-        <div className="page-wrapper">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="page-container max-w-4xl mx-auto w-full px-6" style={{ paddingTop: '2rem' }}>
 
-                {/* Profile Header */}
-                <div className="glass-card p-6 mb-8">
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-2xl font-bold text-indigo-400">
-                            {user?.name?.charAt(0).toUpperCase()}
+            <main className="flex-1 max-w-4xl mx-auto px-4 md:px-6 py-10 w-full">
+
+                {/* Author Card */}
+                <div className="paper-card p-6 mb-8">
+                    <div className="flex items-start gap-5">
+                        <div
+                            className="w-16 h-16 rounded-full border-2 border-[#8B5A2B] flex items-center justify-center shrink-0"
+                            style={{ background: '#EADCC5' }}
+                        >
+                            <span
+                                className="text-2xl font-bold text-[#7A2E2E]"
+                                style={{ fontFamily: "'Playfair Display', serif" }}
+                            >
+                                {user?.name?.charAt(0)?.toUpperCase() || '?'}
+                            </span>
                         </div>
                         <div className="flex-1">
-                            <h1 className="text-xl font-bold text-white">
+                            <h1
+                                className="text-2xl font-black text-[#1F1B16]"
+                                style={{ fontFamily: "'Playfair Display', serif" }}
+                            >
                                 {user?.name}
                             </h1>
-                            <p className="text-slate-400 text-sm">
-                                @{user?.username || user?.email}
-                            </p>
+                            <p className="byline mt-0.5">@{user?.username || user?.email}</p>
                             {user?.bio && (
-                                <p className="text-slate-300 text-sm mt-2">
-                                    {user?.bio}
+                                <p className="text-[#4A3F32] text-sm mt-2 leading-relaxed" style={{ fontFamily: "'IBM Plex Serif', serif" }}>
+                                    {user.bio}
+                                </p>
+                            )}
+                            {user?.country && (
+                                <p className="typewriter-text text-[#8B5A2B] text-xs mt-1">
+                                    📍 {user.country}
                                 </p>
                             )}
                         </div>
                         <button
                             onClick={() => navigate('/edit-profile')}
-                            className="text-xs px-4 py-2 rounded-full border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 transition-colors">
-                            ✏️ Edit Profile
+                            className="ink-btn-ghost text-xs shrink-0"
+                        >
+                            Edit Profile
                         </button>
                     </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex gap-4 mb-6">
-                    <button
-                        onClick={() => setActiveTab('published')}
-                        className={`px-5 py-2 rounded-full text-sm font-medium border transition
-                            ${activeTab === 'published'
-                                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
-                                : 'text-slate-400 border-white/10 hover:border-white/20'
-                            }`}>
-                        Published ({posts.length})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('drafts')}
-                        className={`px-5 py-2 rounded-full text-sm font-medium border transition
-                            ${activeTab === 'drafts'
-                                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
-                                : 'text-slate-400 border-white/10 hover:border-white/20'
-                            }`}>
-                        Drafts ({drafts.length})
-                    </button>
+                {/* Tab navigation */}
+                <div className="flex gap-3 mb-6">
+                    {['published', 'drafts'].map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className="genre-label transition-all"
+                            style={{
+                                fontFamily: "'Special Elite', monospace",
+                                color: activeTab === tab ? '#FAF6EE' : '#8B5A2B',
+                                background: activeTab === tab ? '#7A2E2E' : 'transparent',
+                                borderColor: activeTab === tab ? '#7A2E2E' : '#8B5A2B',
+                                padding: '0.35rem 1rem',
+                            }}
+                        >
+                            {tab === 'published'
+                                ? `PUBLISHED (${posts.length})`
+                                : `DRAFTS (${drafts.length})`
+                            }
+                        </button>
+                    ))}
                 </div>
 
                 {/* Content */}
                 {loading ? (
-                    <div className="text-center text-slate-400 py-20">
-                        Loading...
+                    <div className="flex flex-col items-center justify-center py-24">
+                        <div className="ink-spinner mb-4"></div>
+                        <p className="typewriter-text text-[#8B5A2B] text-sm">Retrieving your dispatches…</p>
                     </div>
                 ) : activeTab === 'published' ? (
                     posts.length === 0 ? (
-                        <div className="text-center text-slate-400 py-20">
-                            <p className="mb-4">No published posts yet</p>
-                            <button
-                                onClick={() => navigate('/write')}
-                                className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-6 py-2 rounded-full text-sm hover:bg-indigo-500/30">
-                                Write your first post
+                        <div className="paper-card text-center py-20 flex flex-col items-center">
+                            <p className="text-4xl mb-4 opacity-30">✒️</p>
+                            <h3 className="text-lg font-bold text-[#1F1B16] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                No published articles yet
+                            </h3>
+                            <p className="typewriter-text text-[#8B5A2B] text-xs mb-5">The press awaits your first dispatch.</p>
+                            <button onClick={() => navigate('/write')} className="stamp-btn text-xs">
+                                Write First Article
                             </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             {posts.map(post => (
                                 <BlogCard
                                     key={post.id}
                                     post={post}
+                                    isOwner={true}
                                     onDelete={(id) => setPosts(posts.filter(p => p.id !== id))}
                                 />
                             ))}
@@ -158,42 +172,48 @@ export default function Profile() {
                     )
                 ) : (
                     drafts.length === 0 ? (
-                        <div className="text-center text-slate-400 py-20">
-                            <p>No drafts saved</p>
+                        <div className="paper-card text-center py-20">
+                            <p className="typewriter-text text-[#8B5A2B] text-sm">No drafts in the archive.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             {drafts.map(draft => (
-                                <div key={draft.id} className="glass-card p-5">
+                                <div key={draft.id} className="paper-card p-5">
                                     <div className="flex items-center gap-2 mb-3">
-                                        <span className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-xs px-3 py-1 rounded-full">
-                                            Draft
+                                        <span className="genre-label" style={{ color: '#B08968', borderColor: '#B08968' }}>
+                                            DRAFT
                                         </span>
-                                        <span className="text-xs text-slate-500">
-                                            {draft.genre}
-                                        </span>
+                                        <span className="typewriter-text text-[#8B5A2B] text-xs">{draft.genre}</span>
                                     </div>
-                                    <h2 className="text-lg font-bold text-white mb-2">
-                                        {draft.title}
+                                    <h2
+                                        className="text-lg font-bold text-[#1F1B16] mb-2"
+                                        style={{ fontFamily: "'Playfair Display', serif" }}
+                                    >
+                                        {draft.title || 'Untitled'}
                                     </h2>
-                                    <p className="text-slate-400 text-sm mb-4 line-clamp-2">
+                                    <p className="text-[#4A3F32] text-sm mb-4 line-clamp-2">
                                         {draft.content?.replace(/<[^>]+>/g, '')}
                                     </p>
+                                    <hr className="vintage-rule mb-3" />
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => navigate(`/write?edit=${draft.id}`)}
-                                            className="text-xs px-3 py-1 rounded-full border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 transition">
-                                            ✏️ Edit
+                                            className="ink-btn-ghost text-xs px-3 py-1"
+                                        >
+                                            Edit
                                         </button>
                                         <button
                                             onClick={() => handlePublish(draft.id)}
-                                            className="text-xs px-3 py-1 rounded-full border border-green-500/30 text-green-400 hover:bg-green-500/20 transition">
-                                            🚀 Publish
+                                            className="ink-btn text-xs px-3 py-1"
+                                        >
+                                            Publish
                                         </button>
                                         <button
                                             onClick={() => handleDeleteDraft(draft.id)}
-                                            className="text-xs px-3 py-1 rounded-full border border-red-500/30 text-red-400 hover:bg-red-500/20 transition">
-                                            🗑 Delete
+                                            className="stamp-btn text-xs px-3 py-1"
+                                            style={{ background: '#5C1F1F', border: 'none' }}
+                                        >
+                                            Delete
                                         </button>
                                     </div>
                                 </div>
@@ -201,7 +221,9 @@ export default function Profile() {
                         </div>
                     )
                 )}
-            </div>
+            </main>
+
+            <Footer />
         </div>
     )
 }

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import BlogCard from '../components/BlogCard'
 import GenreFilter from '../components/GenreFilter'
 import SearchBar from '../components/SearchBar'
@@ -13,24 +14,44 @@ import {
     getFeaturedPosts
 } from '../services/postService'
 
+const QUOTES = [
+    { text: "The pen is mightier than the sword.", author: "Edward Bulwer-Lytton" },
+    { text: "A writer only begins a book. A reader finishes it.", author: "Samuel Johnson" },
+    { text: "You can't use up creativity. The more you use, the more you have.", author: "Maya Angelou" },
+    { text: "There is no greater agony than bearing an untold story inside you.", author: "Maya Angelou" },
+    { text: "Start writing, no matter what. The water does not flow until the faucet is turned on.", author: "Louis L'Amour" },
+]
+
 export default function Home() {
     const { user } = useAuth()
     const [posts, setPosts] = useState([])
-
-    const getFormattedFullName = () => {
-        if (!user) return 'Stories'
-        const rawName = user.name || user.email?.split('@')[0] || 'User'
-        return rawName.charAt(0).toUpperCase() + rawName.slice(1)
-    }
     const [featured, setFeatured] = useState([])
     const [selectedGenre, setSelectedGenre] = useState('All')
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+
+    const quote = QUOTES[new Date().getDay() % QUOTES.length]
+
+    const getFormattedName = () => {
+        if (!user) return null
+        const raw = user.name || user.email?.split('@')[0] || 'Reader'
+        return raw.charAt(0).toUpperCase() + raw.slice(1)
+    }
 
     useEffect(() => {
-        loadPosts()
+        const genre = searchParams.get('genre')
+        const q = searchParams.get('q')
+        if (q) {
+            handleSearch(q)
+        } else if (genre) {
+            setSelectedGenre(genre)
+            handleGenreSelect(genre)
+        } else {
+            loadPosts()
+        }
         loadFeatured()
-    }, [])
+    }, [searchParams])
 
     const loadPosts = async () => {
         try {
@@ -56,9 +77,7 @@ export default function Home() {
         setSelectedGenre(genre)
         setLoading(true)
         try {
-            const data = genre === 'All'
-                ? await getAllPosts()
-                : await getPostsByGenre(genre)
+            const data = genre === 'All' ? await getAllPosts() : await getPostsByGenre(genre)
             setPosts(data)
         } catch (err) {
             console.error(err)
@@ -84,85 +103,132 @@ export default function Home() {
         try {
             const post = await getRandomPost()
             navigate(`/post/${post.id}`)
-        } catch (err) {
+        } catch {
             alert('No posts available yet!')
         }
     }
 
     return (
-        <div className="flex-1 w-full">
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <div className="max-w-6xl mx-auto px-6 py-10 animate-fade-in">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6 glass p-8 rounded-3xl relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3 tracking-tight">
-                            {user ? `Welcome, ` : 'Discover '}<span className="text-gradient">{getFormattedFullName()}</span>
-                        </h1>
-                        <p className="text-slate-300 text-lg font-medium">
-                            {user ? 'Ready to read and share amazing blogs today?' : 'Read and share blogs from writers around the world'}
-                        </p>
+
+            {/* Breaking news ticker */}
+            <div className="bg-[#7A2E2E] text-[#FAF6EE] py-1.5 overflow-hidden">
+                <div className="flex items-center">
+                    <span
+                        className="shrink-0 bg-[#1F1B16] text-[#F5EAD7] px-4 py-0.5 text-xs uppercase tracking-widest z-10"
+                        style={{ fontFamily: "'Special Elite', monospace" }}
+                    >
+                        Latest
+                    </span>
+                    <div className="overflow-hidden flex-1 ml-3">
+                        <span className="ticker-text text-xs" style={{ fontFamily: "'Special Elite', monospace", letterSpacing: '0.05em' }}>
+                            {posts.slice(0, 5).map(p => p.title).join('  ·  ') || 'Welcome to IdeaPad — The Independent Voice of Ideas'}
+                        </span>
                     </div>
-                    <button
-                        onClick={handleSurpriseMe}
-                        className="btn-gradient shadow-indigo-500/25 px-6 py-3 text-base flex items-center gap-2">
-                        <span>🎲</span> Surprise Me
-                    </button>
+                </div>
+            </div>
+
+            <main className="flex-1 max-w-6xl mx-auto px-4 md:px-6 py-8 w-full">
+
+                {/* Welcome / Hero strip */}
+                <div className="mb-8 text-center py-6 border-b-2 border-[#1F1B16]">
+                    {user ? (
+                        <>
+                            <p className="byline mb-1">Good day, {getFormattedName()}</p>
+                            <h2 className="text-3xl md:text-4xl font-bold text-[#1F1B16]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                Your reading awaits
+                            </h2>
+                        </>
+                    ) : (
+                        <>
+                            <p className="byline mb-1">Established in the pursuit of great ideas</p>
+                            <h2 className="text-3xl md:text-4xl font-bold text-[#1F1B16]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                Discover Stories Worth Reading
+                            </h2>
+                        </>
+                    )}
+                    <div className="flex justify-center mt-4">
+                        <button
+                            onClick={handleSurpriseMe}
+                            className="ink-btn-ghost text-xs"
+                        >
+                            ✦ Surprise Me
+                        </button>
+                    </div>
                 </div>
 
+                {/* Featured Posts — Newspaper hero layout */}
                 {featured.length > 0 && (
-                    <div className="mb-12">
-                        <div className="flex items-center gap-2 mb-6">
-                            <span className="text-2xl animate-bounce">🔥</span>
-                            <h2 className="text-2xl font-bold text-white">
-                                Featured Posts
-                            </h2>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {featured.map(post => (
+                    <section className="mb-10">
+                        <div className="section-header">Editor's Featured Selections</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            {featured.slice(0, 4).map(post => (
                                 <BlogCard key={post.id} post={post} />
                             ))}
                         </div>
-                    </div>
+                    </section>
                 )}
 
-                <div className="mb-10">
-                    <div className="flex items-center gap-2 mb-6">
-                        <span className="text-2xl">✨</span>
-                        <h2 className="text-2xl font-bold text-white">
-                            Explore
-                        </h2>
-                    </div>
+                {/* Double rule separator */}
+                <div className="vintage-rule-double my-8"></div>
+
+                {/* Search + Filter section */}
+                <section className="mb-8">
+                    <div className="section-header">Search The Archive</div>
                     <SearchBar onSearch={handleSearch} />
-                    <GenreFilter
-                        selected={selectedGenre}
-                        onSelect={handleGenreSelect}
-                    />
+                    <GenreFilter selected={selectedGenre} onSelect={handleGenreSelect} />
+                </section>
+
+                {/* All Posts grid */}
+                <section>
+                    <div className="section-header">
+                        {selectedGenre === 'All' ? 'Latest Dispatches' : `${selectedGenre} — Field Reports`}
+                    </div>
+
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-24">
+                            <div className="ink-spinner mb-4"></div>
+                            <p className="typewriter-text text-[#8B5A2B] text-sm">Composing the press…</p>
+                        </div>
+                    ) : posts.length === 0 ? (
+                        <div className="paper-card text-center py-20 flex flex-col items-center justify-center">
+                            <p className="text-5xl mb-4 opacity-40">📰</p>
+                            <h3 className="text-xl font-bold text-[#1F1B16] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                No dispatches found
+                            </h3>
+                            <p className="text-[#8B5A2B] typewriter-text text-sm">
+                                Try adjusting your search or genre filters.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            {posts.map(post => (
+                                <BlogCard
+                                    key={post.id}
+                                    post={post}
+                                    onDelete={(id) => setPosts(prev => prev.filter(p => String(p.id) !== String(id)))}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* Quote of the Day */}
+                <div className="mt-16 mb-4 text-center py-10 border-t border-b border-[#C8B89A]">
+                    <p className="byline mb-3 text-[#7A2E2E]">Quote of the Day</p>
+                    <blockquote
+                        className="text-xl md:text-2xl italic text-[#1F1B16] max-w-2xl mx-auto leading-relaxed"
+                        style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                    >
+                        "{quote.text}"
+                    </blockquote>
+                    <p className="byline mt-3">— {quote.author}</p>
                 </div>
 
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20 opacity-70">
-                        <div className="w-10 h-10 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                        <p className="text-indigo-600 font-medium animate-pulse">Loading amazing posts...</p>
-                    </div>
-                ) : posts.length === 0 ? (
-                    <div className="glass-card text-center py-20 flex flex-col items-center justify-center">
-                        <span className="text-6xl mb-4 opacity-50">📭</span>
-                        <h3 className="text-xl font-bold text-slate-200 mb-2">No posts found</h3>
-                        <p className="text-slate-400">Try adjusting your search or genre filters.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {posts.map(post => (
-                            <BlogCard
-                                key={post.id}
-                                post={post}
-                                onDelete={(id) => setPosts(prev => prev.filter(p => String(p.id) !== String(id)))}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
+            </main>
+
+            <Footer />
         </div>
     )
 }
