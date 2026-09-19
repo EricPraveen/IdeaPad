@@ -43,7 +43,7 @@ export default function AdminDashboard() {
   const handleFeature = async (id) => {
     try {
       await featurePost(id)
-      alert('Feature status updated for this dispatch.')
+      alert('Featured status updated for this article.')
     } catch (err) {
       console.error(err)
     }
@@ -61,41 +61,41 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
       
-      {/* Header */}
-      <div className="pb-6 border-b-2 border-[#1A1A1A]">
-        <div className="flex items-center justify-between text-xs font-mono text-[#8F8679] mb-1">
-          <span>CONFIDENTIAL · EDITORIAL GOVERNANCE</span>
-          <span>ADMINISTRATIVE PRIVILEGES</span>
+      {/* Editorial Header */}
+      <div className="pb-6 border-b-2 border-[#161412]">
+        <div className="flex items-center justify-between text-xs font-mono text-[#8E857B] mb-1">
+          <span>ADMINISTRATION &amp; MODERATION</span>
+          <span>ADMIN PRIVILEGES</span>
         </div>
-        <h1 className="font-serif font-black text-3xl sm:text-4xl text-[#1A1A1A]">
-          Editor-in-Chief Console
+        <h1 className="font-serif font-black text-3xl sm:text-4xl text-[#161412]">
+          Admin Dashboard
         </h1>
-        <p className="font-body italic text-xs sm:text-sm text-[#6B6358] mt-1">
-          Moderation queue, dispatch approvals, and journalistic integrity reports.
+        <p className="font-body italic text-xs sm:text-sm text-[#5C554D] mt-1">
+          Review articles, manage featured posts, and oversee reports.
         </p>
       </div>
 
       {/* Metrics Ledger */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="paper-card p-6 bg-[#FAF6EE] text-center border border-[#DDD2C1]">
+        <div className="p-6 bg-[#FAF6EE] text-center border border-[#DDD2C1] rounded-xs shadow-xs">
           <div className="font-serif font-black text-4xl text-[#7A1C2E]">
             {pendingPosts.length}
           </div>
-          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8F8679] mt-1">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8E857B] mt-1">
             Pending Review
           </div>
         </div>
-        <div className="paper-card p-6 bg-[#FAF6EE] text-center border border-[#DDD2C1]">
-          <div className="font-serif font-black text-4xl text-[#C5A059]">
+        <div className="p-6 bg-[#FAF6EE] text-center border border-[#DDD2C1] rounded-xs shadow-xs">
+          <div className="font-serif font-black text-4xl text-[#A67C48]">
             {reports.length}
           </div>
-          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8F8679] mt-1">
-            Reader Inquiries / Reports
+          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8E857B] mt-1">
+            Reported Items
           </div>
         </div>
       </div>
 
-      {/* Tab Nav */}
+      {/* Tab Navigation */}
       <div>
         <div className="flex items-center gap-4 border-b border-[#DDD2C1] mb-6">
           <button
@@ -103,20 +103,20 @@ export default function AdminDashboard() {
             className={`pb-3 text-xs sm:text-sm font-mono tracking-wider uppercase border-b-2 transition-colors cursor-pointer ${
               activeTab === 'posts'
                 ? 'border-[#7A1C2E] text-[#7A1C2E] font-bold'
-                : 'border-transparent text-[#8F8679] hover:text-[#1A1A1A]'
+                : 'border-transparent text-[#8E857B] hover:text-[#161412]'
             }`}
           >
-            Submissions Queue ({pendingPosts.length})
+            Articles Queue ({pendingPosts.length})
           </button>
           <button
             onClick={() => setActiveTab('reports')}
             className={`pb-3 text-xs sm:text-sm font-mono tracking-wider uppercase border-b-2 transition-colors cursor-pointer ${
               activeTab === 'reports'
                 ? 'border-[#7A1C2E] text-[#7A1C2E] font-bold'
-                : 'border-transparent text-[#8F8679] hover:text-[#1A1A1A]'
+                : 'border-transparent text-[#8E857B] hover:text-[#161412]'
             }`}
           >
-            Integrity Reports ({reports.length})
+            User Reports ({reports.length})
           </button>
         </div>
 
@@ -124,17 +124,17 @@ export default function AdminDashboard() {
         {activeTab === 'posts' && (
           <div>
             {loading ? (
-              <div className="py-16 text-center text-xs font-mono text-[#8F8679]">
-                Reading queue ledger…
+              <div className="py-16 text-center text-xs font-mono text-[#8E857B]">
+                Loading review queue…
               </div>
             ) : pendingPosts.length === 0 ? (
-              <div className="paper-card p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE]">
+              <div className="p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs">
                 <span className="text-3xl block mb-2 opacity-50">✓</span>
-                <h3 className="font-serif font-bold text-lg text-[#1A1A1A] mb-1">
+                <h3 className="font-serif font-bold text-lg text-[#161412] mb-1">
                   Queue is clear
                 </h3>
-                <p className="font-body text-xs text-[#6B6358]">
-                  No dispatches currently await editorial review.
+                <p className="font-body text-xs text-[#5C554D]">
+                  No articles currently await review.
                 </p>
               </div>
             ) : (
@@ -142,21 +142,21 @@ export default function AdminDashboard() {
                 {pendingPosts.map(p => (
                   <div
                     key={p.id}
-                    className="paper-card p-5 bg-[#FAF6EE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#DDD2C1]"
+                    className="p-5 bg-[#FAF6EE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#DDD2C1] rounded-xs"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono text-[#7A1C2E] uppercase border border-[#7A1C2E] px-1.5 py-0.2 rounded">
+                        <span className="text-[10px] font-mono text-[#7A1C2E] uppercase border border-[#7A1C2E] px-1.5 py-0.5 rounded-xs">
                           {p.genre || 'General'}
                         </span>
-                        <span className="text-xs font-mono text-[#8F8679]">
+                        <span className="text-xs font-mono text-[#8E857B]">
                           By {p.authorName || 'Anonymous'}
                         </span>
                       </div>
-                      <h4 className="font-serif font-bold text-lg text-[#1A1A1A]">
+                      <h4 className="font-serif font-bold text-lg text-[#161412]">
                         {p.title}
                       </h4>
-                      <p className="font-body text-xs text-[#6B6358] line-clamp-1 mt-1">
+                      <p className="font-body text-xs text-[#5C554D] line-clamp-1 mt-1">
                         {p.content?.replace(/<[^>]+>/g, '') || ''}
                       </p>
                     </div>
@@ -164,15 +164,15 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => handleFeature(p.id)}
-                        className="ink-btn-ghost text-xs py-1.5 px-3"
+                        className="editorial-btn-secondary text-xs py-1.5 px-3 cursor-pointer"
                       >
                         ★ Feature
                       </button>
                       <button
                         onClick={() => handleApprove(p.id)}
-                        className="stamp-btn text-xs py-1.5 px-3"
+                        className="editorial-btn-primary text-xs py-1.5 px-3 cursor-pointer"
                       >
-                        Approve for Press
+                        Approve Article
                       </button>
                     </div>
                   </div>
@@ -186,13 +186,13 @@ export default function AdminDashboard() {
         {activeTab === 'reports' && (
           <div>
             {reports.length === 0 ? (
-              <div className="paper-card p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE]">
+              <div className="p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs">
                 <span className="text-3xl block mb-2 opacity-50">⚖</span>
-                <h3 className="font-serif font-bold text-lg text-[#1A1A1A] mb-1">
-                  Zero Outstanding Reports
+                <h3 className="font-serif font-bold text-lg text-[#161412] mb-1">
+                  No Reports
                 </h3>
-                <p className="font-body text-xs text-[#6B6358]">
-                  The publication's discourse is healthy and in accordance with editorial standards.
+                <p className="font-body text-xs text-[#5C554D]">
+                  There are no pending reports at this time.
                 </p>
               </div>
             ) : (
@@ -200,21 +200,21 @@ export default function AdminDashboard() {
                 {reports.map(rep => (
                   <div
                     key={rep.id}
-                    className="paper-card p-5 bg-[#FAF6EE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#DDD2C1]"
+                    className="p-5 bg-[#FAF6EE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#DDD2C1] rounded-xs"
                   >
                     <div>
                       <div className="text-[10px] font-mono uppercase text-[#7A1C2E] mb-1">
                         REASON: {rep.reason || 'Flagged by reader'}
                       </div>
-                      <p className="font-body text-sm text-[#1A1A1A]">
+                      <p className="font-body text-sm text-[#161412]">
                         Post Ref #{rep.postId}
                       </p>
                     </div>
                     <button
                       onClick={() => handleResolve(rep.id)}
-                      className="stamp-btn text-xs py-1.5 px-3"
+                      className="editorial-btn-primary text-xs py-1.5 px-3 cursor-pointer"
                     >
-                      Resolve &amp; Archive
+                      Resolve Report
                     </button>
                   </div>
                 ))}

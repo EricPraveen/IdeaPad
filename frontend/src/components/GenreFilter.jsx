@@ -1,28 +1,26 @@
-const genres = [
-  'All', 'Technology', 'Travel', 'Food',
-  'Lifestyle', 'Fiction', 'Opinion',
-  'Health', 'Finance', 'Gaming', 'Culture', 'Else'
-]
+import { CATEGORIES } from '../constants/categories'
 
 export default function GenreFilter({ selected, onSelect }) {
+  const allDesks = [{ id: 'all', name: 'All' }, ...CATEGORIES]
+
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none mb-6">
-      <span className="text-[11px] font-mono uppercase tracking-widest text-[#8F8679] shrink-0 mr-1">
-        Desk:
+    <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-6 border-b border-[#DDD2C1] pt-1">
+      <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#8E857B] shrink-0 mr-2">
+        Desks:
       </span>
-      {genres.map(genre => {
-        const isSelected = selected === genre
+      {allDesks.map(cat => {
+        const isSelected = selected === cat.name
         return (
           <button
-            key={genre}
-            onClick={() => onSelect(genre)}
-            className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer border ${
+            key={cat.name}
+            onClick={() => onSelect(cat.name)}
+            className={`shrink-0 px-3 py-1 text-xs font-mono uppercase tracking-wider transition-all duration-150 cursor-pointer border-b-2 ${
               isSelected
-                ? 'bg-[#7A1C2E] text-[#FAF6EE] border-[#7A1C2E] shadow-sm font-bold scale-[1.02]'
-                : 'bg-[#FAF6EE] text-[#3A3530] border-[#DDD2C1] hover:border-[#7A1C2E] hover:text-[#7A1C2E]'
+                ? 'border-[#7A1C2E] text-[#7A1C2E] font-bold bg-[#EFE8DC]/50'
+                : 'border-transparent text-[#5C554D] hover:text-[#161412] hover:border-[#C4B59F]'
             }`}
           >
-            {genre}
+            {cat.name}
           </button>
         )
       })}

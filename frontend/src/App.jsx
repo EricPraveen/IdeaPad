@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import EditorialLayout from './components/EditorialLayout'
+import CustomCursor from './components/CustomCursor'
 import Home from './pages/Home'
 import LoginPage from './pages/LoginPage'
 import Register from './pages/Register'
@@ -14,6 +15,7 @@ import UserProfile from './pages/UserProfile'
 function App() {
   return (
     <Router>
+      <CustomCursor />
       <EditorialLayout>
         <Routes>
           <Route path="/" element={<Home />} />

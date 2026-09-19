@@ -24,7 +24,7 @@ export default function PostDetail() {
   const [bookmarked, setBookmarked] = useState(false)
   const [readProgress, setReadProgress] = useState(0)
   const [copied, setCopied] = useState(false)
-  const [fontSizeLevel, setFontSizeLevel] = useState(1) // 0: normal, 1: comfortable, 2: large
+  const [fontSizeLevel, setFontSizeLevel] = useState(1) // 0: standard, 1: comfortable, 2: large
   const contentRef = useRef(null)
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function PostDetail() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [id])
 
-  // Reading progress tracking
+  // Track reading progress
   useEffect(() => {
     const handleScroll = () => {
       const el = contentRef.current
@@ -58,7 +58,10 @@ export default function PostDetail() {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           })
           setLiked(Boolean(likeRes.data))
-        } catch {}
+        } catch (e) {
+          // Like status unavailable or unauthenticated
+          void e
+        }
       }
     } catch (err) {
       console.error(err)
@@ -97,7 +100,7 @@ export default function PostDetail() {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to remove this dispatch from the archive?')) return
+    if (!window.confirm('Are you sure you want to delete this article?')) return
     try {
       await axios.delete(`http://localhost:8080/api/posts/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -108,7 +111,7 @@ export default function PostDetail() {
     }
   }
 
-  // Parse Headings for Sticky Table of Contents & Inject Drop Cap
+  // Parse headings for table of contents and inject drop cap
   const { processedHtml, tocItems } = useMemo(() => {
     if (!post || !post.content) return { processedHtml: '', tocItems: [] }
 
@@ -127,10 +130,9 @@ export default function PostDetail() {
       })
     })
 
-    // If no headings found, generate intuitive editorial sections if content is long
     let contentHtml = doc.body.innerHTML
 
-    // Add drop-cap to first paragraph letter
+    // Add drop cap to opening paragraph
     contentHtml = contentHtml.replace(
       /^(<p[^>]*>)?([A-Za-z])/,
       (match, pTag, letter) => `${pTag || '<p>'}<span class="drop-cap-letter">${letter}</span>`
@@ -142,8 +144,8 @@ export default function PostDetail() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] py-24">
-        <div className="w-10 h-10 border-3 border-[#DDD2C1] border-t-[#7A1C2E] rounded-full animate-spin mb-4"></div>
-        <p className="font-mono text-xs text-[#8F8679]">Fetching article from the library press…</p>
+        <div className="w-8 h-8 border-2 border-[#DDD2C1] border-t-[#7A1C2E] rounded-full animate-spin mb-3"></div>
+        <p className="font-mono text-xs text-[#8E857B]">Loading article…</p>
       </div>
     )
   }
@@ -151,14 +153,14 @@ export default function PostDetail() {
   if (!post) {
     return (
       <div className="max-w-xl mx-auto py-20 px-6 text-center">
-        <span className="text-5xl block mb-4 opacity-50">📰</span>
-        <h2 className="font-serif font-black text-2xl text-[#1A1A1A] mb-2">
-          Dispatch not found
+        <span className="text-4xl block mb-3 opacity-50">📰</span>
+        <h2 className="font-serif font-black text-2xl text-[#161412] mb-2">
+          Article not found
         </h2>
-        <p className="text-sm font-body text-[#6B6358] mb-6">
-          This article may have been archived or removed from the catalog.
+        <p className="text-sm font-body text-[#5C554D] mb-6">
+          This article may have been deleted or removed.
         </p>
-        <Link to="/" className="stamp-btn text-xs">
+        <Link to="/" className="editorial-btn-primary text-xs">
           ← Return to Front Page
         </Link>
       </div>
@@ -181,61 +183,66 @@ export default function PostDetail() {
   )
 
   const fontSizeClasses = [
-    'text-base leading-relaxed',
-    'text-lg leading-loose',
-    'text-xl leading-loose'
+    'text-base leading-[1.8]',
+    'text-lg leading-[1.9]',
+    'text-xl leading-[2.0]'
   ]
 
   return (
     <div className="relative" ref={contentRef}>
       
-      {/* ─── TOP READING PROGRESS BAR ───────────────────────── */}
+      {/* ─── READING PROGRESS INDICATOR ─────────────────────── */}
       <div id="reading-progress" style={{ width: `${readProgress}%` }}></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-        {/* Breadcrumb row */}
-        <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-[#DDD2C1]">
+        {/* Navigation Breadcrumb */}
+        <div className="flex items-center justify-between gap-4 mb-8 pb-3 border-b border-[#DDD2C1]">
           <Link
             to="/"
-            className="text-xs font-mono text-[#6B6358] hover:text-[#7A1C2E] flex items-center gap-1.5 transition-colors"
+            className="text-xs font-mono text-[#6E665D] hover:text-[#7A1C2E] flex items-center gap-1.5 transition-colors uppercase tracking-wider"
           >
             ← FRONT PAGE
           </Link>
           <div className="flex items-center gap-3">
             <span className={getGenreColor(post.genre)}>
-              {post.genre || 'Dispatch'}
+              {post.genre || 'Article'}
             </span>
-            <span className="text-xs font-mono text-[#8F8679]">
+            <span className="text-xs font-mono text-[#8E857B]">
               {mins} MIN READ
             </span>
           </div>
         </div>
 
-        {/* ─── ARTICLE HEADER ───────────────────────────────── */}
-        <header className="max-w-4xl mx-auto text-center mb-10">
-          <h1 className="font-serif font-black text-3xl sm:text-5xl lg:text-6xl text-[#1A1A1A] leading-[1.15] mb-6 tracking-tight">
+        {/* ─── EDITORIAL ARTICLE HEADER ───────────────────────── */}
+        <header className="max-w-3xl mx-auto text-center mb-10">
+          
+          <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#7A1C2E] font-semibold block mb-3">
+            {post.genre ? post.genre.toUpperCase() : 'ARTICLE'}
+          </span>
+
+          <h1 className="font-serif font-black text-3xl sm:text-5xl lg:text-6xl text-[#161412] leading-[1.14] mb-6 tracking-tight">
             {post.title}
           </h1>
 
-          {/* Author Byline & Date */}
-          <div className="flex items-center justify-center gap-4 flex-wrap text-sm text-[#3A3530] pb-6 border-b border-[#DDD2C1]">
+          {/* Author Byline and Reading Controls */}
+          <div className="flex items-center justify-center gap-5 flex-wrap text-sm text-[#35312C] pb-6 border-b border-[#DDD2C1]">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-[#EFE8DC] border border-[#C5A059] flex items-center justify-center font-serif font-bold text-sm text-[#7A1C2E]">
+              <div className="w-9 h-9 rounded-xs bg-[#EFE8DC] border border-[#DDD2C1] flex items-center justify-center font-serif font-bold text-sm text-[#7A1C2E]">
                 {post.authorName ? post.authorName.charAt(0).toUpperCase() : 'A'}
               </div>
               <div className="text-left">
                 {post.isAnonymous ? (
-                  <span className="font-mono text-xs uppercase text-[#1A1A1A]">By Anonymous</span>
+                  <span className="font-mono text-xs uppercase text-[#161412] block">By Anonymous</span>
                 ) : (
                   <Link
                     to={`/user/${post.authorId}`}
-                    className="font-mono text-xs uppercase font-bold text-[#1A1A1A] hover:text-[#7A1C2E] transition-colors"
+                    className="font-mono text-xs uppercase font-bold text-[#161412] hover:text-[#7A1C2E] transition-colors block"
                   >
                     By {post.authorName}
                   </Link>
                 )}
-                <div className="text-[11px] text-[#8F8679] font-mono">
+                <div className="text-[10px] text-[#8E857B] font-mono">
                   {dateStr}
                 </div>
               </div>
@@ -243,26 +250,26 @@ export default function PostDetail() {
 
             <div className="hidden sm:block h-6 w-px bg-[#DDD2C1]"></div>
 
-            {/* Reading preferences toggle */}
-            <div className="flex items-center gap-1 bg-[#FAF6EE] border border-[#DDD2C1] rounded px-2 py-1 text-xs font-mono text-[#6B6358]">
-              <span>Font:</span>
+            {/* Type Size Controls */}
+            <div className="flex items-center gap-1 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs px-2 py-1 text-xs font-mono text-[#6E665D]">
+              <span className="text-[10px] mr-1">TYPE:</span>
               <button
                 onClick={() => setFontSizeLevel(0)}
-                className={`px-1.5 py-0.5 rounded ${fontSizeLevel === 0 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
+                className={`px-1.5 py-0.5 rounded-xs cursor-pointer ${fontSizeLevel === 0 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
                 title="Normal text"
               >
                 A
               </button>
               <button
                 onClick={() => setFontSizeLevel(1)}
-                className={`px-1.5 py-0.5 rounded text-sm ${fontSizeLevel === 1 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
+                className={`px-1.5 py-0.5 rounded-xs text-sm cursor-pointer ${fontSizeLevel === 1 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
                 title="Comfortable text"
               >
                 A+
               </button>
               <button
                 onClick={() => setFontSizeLevel(2)}
-                className={`px-1.5 py-0.5 rounded text-base ${fontSizeLevel === 2 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
+                className={`px-1.5 py-0.5 rounded-xs text-base cursor-pointer ${fontSizeLevel === 2 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
                 title="Large text"
               >
                 A++
@@ -271,42 +278,41 @@ export default function PostDetail() {
           </div>
         </header>
 
-        {/* ─── COVER PHOTOGRAPH ─────────────────────────────── */}
+        {/* ─── COVER PHOTOGRAPH PLATE ─────────────────────────── */}
         {post.coverImage && (
-          <figure className="max-w-5xl mx-auto mb-10">
-            <div className="editorial-frame aspect-[16/9] sm:aspect-[21/9] max-h-[480px]">
+          <figure className="max-w-4xl mx-auto mb-12">
+            <div className="aspect-[16/9] sm:aspect-[21/9] max-h-[460px] overflow-hidden border border-[#DDD2C1] bg-[#141311]">
               <img
                 src={post.coverImage}
                 alt={post.title}
                 className="w-full h-full object-cover"
               />
             </div>
-            <figcaption className="editorial-caption">
-              Lead plate illustration: {post.title}
+            <figcaption className="editorial-caption text-center mt-2.5 text-xs font-mono text-[#8E857B] italic">
+              {post.title}
             </figcaption>
           </figure>
         )}
 
-        {/* ─── MAIN READING LAYOUT (WITH STICKY TOC) ─────────── */}
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* ─── MAIN READING BODY & INTERACTIVE DOCK ────────────── */}
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
           
-          {/* Left / Desktop Sticky Table of Contents */}
+          {/* Table of Contents Sticky Rail */}
           <aside className="hidden lg:block lg:col-span-3">
-            <div className="sticky top-24 space-y-6">
+            <div className="sticky top-20 space-y-5">
               
-              {/* Table of Contents card */}
-              {tocItems.length > 0 ? (
-                <div className="paper-card p-5 bg-[#FAF6EE]">
-                  <h4 className="font-serif font-bold text-xs uppercase tracking-widest text-[#7A1C2E] mb-3 pb-2 border-b border-[#DDD2C1]">
+              {tocItems.length > 0 && (
+                <div className="p-4 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs">
+                  <h4 className="font-serif font-bold text-xs uppercase tracking-widest text-[#7A1C2E] mb-2.5 pb-1.5 border-b border-[#DDD2C1]">
                     Table of Contents
                   </h4>
-                  <nav className="space-y-2 text-xs font-body">
+                  <nav className="space-y-1.5 text-xs font-body">
                     {tocItems.map(item => (
                       <a
                         key={item.id}
                         href={`#${item.id}`}
-                        className={`block text-[#6B6358] hover:text-[#7A1C2E] transition-colors leading-snug ${
-                          item.level === 'h3' ? 'pl-3 text-[11px]' : 'font-medium'
+                        className={`block text-[#6E665D] hover:text-[#7A1C2E] transition-colors leading-snug ${
+                          item.level === 'h3' ? 'pl-2 text-[11px]' : 'font-medium'
                         }`}
                       >
                         • {item.text}
@@ -314,77 +320,78 @@ export default function PostDetail() {
                     ))}
                   </nav>
                 </div>
-              ) : (
-                <div className="paper-card p-4 bg-[#FAF6EE] text-center text-xs font-mono text-[#8F8679]">
-                  <span className="block text-base mb-1">📜</span>
-                  <span>Complete Long-form Dispatch</span>
-                </div>
               )}
 
-              {/* Quick info stamp */}
-              <div className="paper-subtle p-4 rounded text-center border border-[#DDD2C1]">
-                <div className="text-[10px] font-mono text-[#8F8679] uppercase">DISPATCH METRICS</div>
-                <div className="font-serif font-black text-2xl text-[#1A1A1A] my-1">{mins} min</div>
-                <div className="text-[11px] font-mono text-[#7A1C2E]">{likeCount} endorsements</div>
+              {/* Article Metrics Tile */}
+              <div className="p-3.5 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-center">
+                <div className="text-[10px] font-mono text-[#8E857B] uppercase tracking-wider">
+                  ARTICLE STATS
+                </div>
+                <div className="font-serif font-black text-2xl text-[#161412] my-1">
+                  {mins} min
+                </div>
+                <div className="text-[11px] font-mono text-[#7A1C2E]">
+                  {likeCount} {likeCount === 1 ? 'like' : 'likes'}
+                </div>
               </div>
 
             </div>
           </aside>
 
-          {/* Central Article Body */}
+          {/* Central Narrow Long-form Body */}
           <article className="lg:col-span-7">
             <div
-              className={`vintage-prose ${fontSizeClasses[fontSizeLevel]}`}
+              className={`vintage-prose ${fontSizeClasses[fontSizeLevel]} font-body text-[#26221E]`}
               dangerouslySetInnerHTML={{ __html: processedHtml }}
             />
 
-            {/* End of article ornament */}
-            <div className="flex items-center justify-center gap-3 my-12 text-[#C5A059]">
+            {/* End of article printer's mark */}
+            <div className="flex items-center justify-center gap-3 my-12 text-[#A67C48]">
               <div className="h-px w-16 bg-[#DDD2C1]"></div>
-              <span className="font-serif font-bold text-lg">❦</span>
+              <span className="font-serif font-bold text-xl">❦</span>
               <div className="h-px w-16 bg-[#DDD2C1]"></div>
             </div>
 
-            {/* Author Spotlight Box */}
+            {/* About the Author Box */}
             {!post.isAnonymous && (
-              <div className="paper-card p-6 sm:p-8 mb-10 flex flex-col sm:flex-row items-center sm:items-start gap-5">
-                <div className="w-16 h-16 rounded-full bg-[#EFE8DC] border-2 border-[#C5A059] flex items-center justify-center font-serif font-bold text-2xl text-[#7A1C2E] shrink-0">
+              <div className="p-6 sm:p-7 mb-8 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                <div className="w-14 h-14 rounded-xs bg-[#EFE8DC] border border-[#DDD2C1] flex items-center justify-center font-serif font-bold text-xl text-[#7A1C2E] shrink-0">
                   {post.authorName ? post.authorName.charAt(0).toUpperCase() : 'A'}
                 </div>
                 <div className="text-center sm:text-left flex-1">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#7A1C2E]">
-                    ABOUT THE CORRESPONDENT
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7A1C2E] font-semibold">
+                    ABOUT THE AUTHOR
                   </span>
-                  <h3 className="font-serif font-bold text-xl text-[#1A1A1A] mt-0.5 mb-2">
+                  <h3 className="font-serif font-bold text-lg text-[#161412] mt-0.5 mb-1.5">
                     {post.authorName}
                   </h3>
-                  <p className="font-body text-xs sm:text-sm text-[#6B6358] leading-relaxed mb-3">
-                    Regular contributor to the IdeaPad Gazette, investigating topics in {post.genre || 'arts and culture'}.
+                  <p className="font-body text-xs text-[#5C554D] leading-relaxed mb-3">
+                    Writer on IDEAPAD, covering {post.genre || 'ideas and stories'}.
                   </p>
                   <Link
                     to={`/user/${post.authorId}`}
-                    className="ink-btn-ghost text-xs py-1 px-3 inline-flex items-center gap-1"
+                    className="editorial-btn-secondary text-xs py-1 px-3 inline-flex items-center gap-1"
                   >
-                    View Writer's Portfolio →
+                    View Writer Profile →
                   </Link>
                 </div>
               </div>
             )}
 
-            {/* Author Controls */}
+            {/* Author Management Row */}
             {isAuthor && (
-              <div className="paper-subtle p-4 rounded flex items-center justify-between mb-8 border border-[#DDD2C1]">
-                <span className="font-mono text-xs text-[#8F8679]">Author Privileges:</span>
+              <div className="p-3.5 bg-[#EFE8DC] border border-[#DDD2C1] rounded-xs flex items-center justify-between mb-8">
+                <span className="font-mono text-xs text-[#8E857B]">Author Privileges:</span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => navigate(`/write?edit=${post.id}`)}
-                    className="ink-btn-ghost text-xs py-1 px-3"
+                    className="editorial-btn-secondary text-xs py-1 px-3 cursor-pointer"
                   >
                     Edit Post
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="stamp-btn text-xs py-1 px-3"
+                    className="editorial-btn-primary text-xs py-1 px-3 cursor-pointer"
                   >
                     Delete Post
                   </button>
@@ -393,19 +400,19 @@ export default function PostDetail() {
             )}
           </article>
 
-          {/* Right / Desktop Sticky Action Panel */}
+          {/* Sticky Reader Action Panel (Right Rail) */}
           <aside className="lg:col-span-2">
-            <div className="sticky top-24 flex flex-row lg:flex-col items-center justify-center gap-3 p-3 paper-card bg-[#FAF6EE]">
+            <div className="sticky top-20 flex flex-row lg:flex-col items-center justify-center gap-2.5 p-2.5 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs">
               
               {/* Like Button */}
               <button
                 onClick={handleLike}
-                className={`w-full py-2.5 px-3 rounded flex items-center justify-center gap-2 text-xs font-mono transition-all cursor-pointer ${
+                className={`w-full py-2 px-3 rounded-xs flex items-center justify-center gap-2 text-xs font-mono transition-all cursor-pointer border ${
                   liked
-                    ? 'bg-[#7A1C2E] text-[#FAF6EE] shadow-sm'
-                    : 'bg-[#EFE8DC] text-[#1A1A1A] hover:bg-[#E2D6C3]'
+                    ? 'bg-[#7A1C2E] text-[#FAF6EE] border-[#581220]'
+                    : 'bg-[#EFE8DC] text-[#161412] border-[#DDD2C1] hover:bg-[#E2D6C3]'
                 }`}
-                title="Endorse dispatch"
+                title="Like article"
               >
                 <span>{liked ? '♥' : '♡'}</span>
                 <span>{likeCount}</span>
@@ -414,21 +421,21 @@ export default function PostDetail() {
               {/* Bookmark Button */}
               <button
                 onClick={handleBookmark}
-                className={`w-full py-2.5 px-3 rounded flex items-center justify-center gap-2 text-xs font-mono transition-all cursor-pointer ${
+                className={`w-full py-2 px-3 rounded-xs flex items-center justify-center gap-2 text-xs font-mono transition-all cursor-pointer border ${
                   bookmarked
-                    ? 'bg-[#C5A059] text-[#1A1A1A] font-bold shadow-sm'
-                    : 'bg-[#EFE8DC] text-[#1A1A1A] hover:bg-[#E2D6C3]'
+                    ? 'bg-[#A67C48] text-[#FAF6EE] border-[#8C6433]'
+                    : 'bg-[#EFE8DC] text-[#161412] border-[#DDD2C1] hover:bg-[#E2D6C3]'
                 }`}
-                title="Save to clippings"
+                title="Save bookmark"
               >
                 <span>🔖</span>
                 <span className="hidden sm:inline">{bookmarked ? 'Saved' : 'Save'}</span>
               </button>
 
-              {/* Share Button */}
+              {/* Share Link */}
               <button
                 onClick={handleShare}
-                className="w-full py-2.5 px-3 rounded bg-[#EFE8DC] text-[#1A1A1A] hover:bg-[#E2D6C3] flex items-center justify-center gap-2 text-xs font-mono transition-all cursor-pointer"
+                className="w-full py-2 px-3 rounded-xs bg-[#EFE8DC] border border-[#DDD2C1] text-[#161412] hover:bg-[#E2D6C3] flex items-center justify-center gap-2 text-xs font-mono transition-all cursor-pointer"
                 title="Copy share link"
               >
                 <span>🔗</span>

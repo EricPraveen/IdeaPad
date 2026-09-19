@@ -36,51 +36,55 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <div className="paper-card p-6 sm:p-8 bg-[#FAF6EE] border-2 border-[#DDD2C1] shadow-xl text-center">
+    <div className="max-w-md mx-auto px-4 py-16">
+      <div className="p-7 sm:p-9 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs shadow-xs text-center">
         
-        {/* Wax Seal Stamp */}
-        <div className="w-14 h-14 mx-auto rounded-full bg-[#7A1C2E] text-[#FAF6EE] font-serif font-black text-2xl flex items-center justify-center mb-3 shadow-md">
+        {/* Editorial Press Stamp */}
+        <div className="w-12 h-12 mx-auto rounded-xs bg-[#7A1C2E] text-[#FAF6EE] font-serif font-black text-xl flex items-center justify-center mb-3 shadow-xs">
           I
         </div>
 
-        <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C5A059] mb-1">
-          GAZETTE MEMBERSHIP
+        <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#A67C48] mb-1 font-semibold">
+          WELCOME BACK
         </div>
-        <h1 className="font-serif font-black text-2xl sm:text-3xl text-[#1A1A1A]">
-          Correspondent Sign In
+        <h1 className="font-serif font-black text-2xl sm:text-3xl text-[#161412]">
+          Sign In
         </h1>
-        <p className="font-body italic text-xs text-[#6B6358] mt-1 mb-6">
-          Access your private study, reading library, and dispatch submissions.
+        <p className="font-body italic text-xs text-[#5C554D] mt-1 mb-6">
+          Sign in to access your articles, saved stories, and account.
         </p>
 
         {error && (
-          <div className="p-3 mb-5 rounded bg-[#FDF0F0] border border-[#7A1C2E] text-[#7A1C2E] text-xs font-mono text-left">
+          <div className="p-3 mb-5 rounded-xs bg-[#FAF0F0] border border-[#7A1C2E] text-[#7A1C2E] text-xs font-mono text-left">
             ⚠ {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <div>
-            <label className="byline block mb-1">Email or Username</label>
+            <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D] block mb-1.5">
+              Email or Username
+            </label>
             <input
               type="text"
               name="usernameOrEmail"
               value={form.usernameOrEmail}
               onChange={handleChange}
               required
-              placeholder="e.g. emily.dickinson@press.org"
-              className="ink-input w-full text-sm"
+              placeholder="you@example.com or username"
+              className="w-full px-3 py-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs sm:text-sm font-body text-[#161412] focus:outline-none focus:border-[#7A1C2E]"
             />
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="byline">Access Cipher (Password)</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D]">
+                Password
+              </label>
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-[11px] font-mono text-[#8F8679] hover:text-[#7A1C2E]"
+                className="text-[10px] font-mono text-[#8E857B] hover:text-[#7A1C2E] cursor-pointer"
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -92,7 +96,7 @@ export default function LoginPage() {
               onChange={handleChange}
               required
               placeholder="••••••••••••"
-              className="ink-input w-full text-sm"
+              className="w-full px-3 py-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs sm:text-sm font-mono text-[#161412] focus:outline-none focus:border-[#7A1C2E]"
             />
           </div>
 
@@ -100,17 +104,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="stamp-btn w-full py-2.5 text-xs tracking-widest"
+              className="editorial-btn-primary w-full py-2.5 text-xs tracking-widest"
             >
-              {loading ? 'Verifying Cipher…' : 'Authenticate & Enter'}
+              {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </div>
         </form>
 
-        <div className="mt-6 pt-5 border-t border-[#DDD2C1] text-xs font-mono text-[#6B6358]">
-          New to the publication?{' '}
+        <div className="mt-6 pt-5 border-t border-[#DDD2C1] text-xs font-mono text-[#6E665D]">
+          Don't have an account?{' '}
           <Link to="/register" className="text-[#7A1C2E] hover:underline font-bold">
-            Enroll as a Correspondent →
+            Create an account →
           </Link>
         </div>
 
