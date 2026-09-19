@@ -1,30 +1,22 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { CATEGORIES } from '../constants/categories'
 import Footer from './Footer'
-
-const CATEGORIES = [
-  'Technology', 'Travel', 'Food', 'Lifestyle',
-  'Fiction', 'Opinion', 'Health', 'Finance', 'Culture'
-]
 
 export default function EditorialLayout({ children }) {
   const { user, logoutUser } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Sidebar state: collapsed (68px) vs expanded (240px)
-  const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  // Navigation states
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
-  
-  // Header state
-  const [searchQuery, setSearchQuery] = useState('')
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
-  const [aboutModalOpen, setAboutModalOpen] = useState(false)
   const [categoriesDrawerOpen, setCategoriesDrawerOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [aboutModalOpen, setAboutModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  // Current date in broadsheet format
+  // Date format
   const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',
@@ -32,13 +24,14 @@ export default function EditorialLayout({ children }) {
     year: 'numeric'
   })
 
-  // Close mobile drawers on route change
+  // Close modals on route changes
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setMobileDrawerOpen(false)
-    setNotificationsOpen(false)
-    setAvatarMenuOpen(false)
     setCategoriesDrawerOpen(false)
-  }, [location.pathname])
+    setNotificationsOpen(false)
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [location.pathname, location.search])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
@@ -50,282 +43,310 @@ export default function EditorialLayout({ children }) {
 
   const handleLogout = () => {
     logoutUser()
-    setAvatarMenuOpen(false)
     navigate('/')
   }
 
-  // Ink ripple effect on click
-  useEffect(() => {
-    const handleGlobalClick = (e) => {
-      const target = e.target.closest('a, button, [role="button"]')
-      if (!target) return
-      
-      const ripple = document.createElement('span')
-      ripple.className = 'ink-drop-effect'
-      const rect = target.getBoundingClientRect()
-      const size = Math.max(rect.width, rect.height)
-      const x = e.clientX - rect.left - size / 2
-      const y = e.clientY - rect.top - size / 2
-
-      ripple.style.width = ripple.style.height = `${size}px`
-      ripple.style.left = `${x}px`
-      ripple.style.top = `${y}px`
-      ripple.style.position = 'absolute'
-      ripple.style.borderRadius = '50%'
-      ripple.style.pointerEvents = 'none'
-      ripple.style.background = 'radial-gradient(circle, rgba(122,28,46,0.25) 0%, transparent 70%)'
-      ripple.style.transform = 'scale(0)'
-      ripple.style.animation = 'inkDropAnim 0.5s ease-out forwards'
-
-      target.style.position = target.style.position || 'relative'
-      target.style.overflow = 'hidden'
-      target.appendChild(ripple)
-      setTimeout(() => ripple.remove(), 550)
-    }
-
-    document.addEventListener('click', handleGlobalClick)
-    return () => document.removeEventListener('click', handleGlobalClick)
-  }, [])
+  // Determine active navigation states
+  const isHome = location.pathname === '/' && !location.search.includes('q=') && !location.search.includes('genre=')
+  const isExplore = location.search.includes('q=') || location.search.includes('genre=')
+  const isWrite = location.pathname === '/write'
+  const isSaved = location.pathname === '/bookmarks'
+  const isProfile = location.pathname === '/profile' || location.pathname.startsWith('/user/')
+  const isSettings = location.pathname === '/edit-profile'
+  const isAdmin = location.pathname === '/admin'
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F7F1E8] text-[#1A1A1A] relative">
+    <div className="min-h-screen flex flex-col bg-[#F7F2E8] text-[#161412] relative font-body antialiased">
       
-      {/* ─── FIXED LEFT SIDEBAR (Desktop) ────────────────────── */}
+      {/* ════════════════════════════════════════════════════════════
+          FIXED LEFT SIDEBAR NAVIGATION (Desktop: md and up)
+          Dark Charcoal / Ink aesthetic, subtle borders, editorial typography
+          ════════════════════════════════════════════════════════════ */}
       <aside
-        onMouseEnter={() => setSidebarExpanded(true)}
-        onMouseLeave={() => setSidebarExpanded(false)}
-        className={`hidden md:flex flex-col fixed top-0 left-0 h-screen z-50 bg-[#FAF6EE] border-r border-[#DDD2C1] transition-all duration-300 ease-in-out shadow-sm ${
-          sidebarExpanded ? 'w-60 shadow-xl' : 'w-16'
-        }`}
-        style={{
-          boxShadow: sidebarExpanded ? '4px 0 24px rgba(26,26,26,0.08)' : 'none'
-        }}
+        className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-60 z-40 bg-[#141311] border-r border-[#282521] text-[#FAF6EE] select-none"
+        aria-label="Sidebar Navigation"
       >
-        {/* Sidebar Header / Logo Icon */}
-        <div className="h-16 flex items-center px-4 border-b border-[#DDD2C1] justify-between overflow-hidden">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#7A1C2E] flex items-center justify-center text-[#FAF6EE] font-serif font-black text-base shrink-0 shadow-sm">
+        {/* Brand Masthead Header */}
+        <div className="p-5 border-b border-[#282521]">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-8 h-8 rounded-xs bg-[#7A1C2E] border border-[#581220] flex items-center justify-center font-serif font-black text-base text-[#FAF6EE] shrink-0 shadow-xs group-hover:bg-[#8E2135] transition-colors">
               I
             </div>
-            <div className={`transition-opacity duration-200 whitespace-nowrap ${sidebarExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <span className="font-serif font-bold text-lg text-[#1A1A1A] tracking-tight">IdeaPad</span>
-              <span className="block text-[9px] uppercase tracking-widest text-[#C5A059] font-mono">Press</span>
+            <div className="min-w-0">
+              <span className="font-serif font-black text-xl tracking-tight text-[#FAF6EE] block leading-none">
+                IDEAPAD
+              </span>
+              <span className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#A67C48] block mt-1">
+                Writing &amp; Publishing
+              </span>
             </div>
           </Link>
+
+          <div className="mt-3 pt-2.5 border-t border-[#22201C] flex items-center justify-between text-[10px] font-mono text-[#8E857B]">
+            <span>ISSUE 142</span>
+            <span>EST. 2026</span>
+          </div>
         </div>
 
-        {/* Small visible expander tab on the edge */}
-        <button
-          onClick={() => setSidebarExpanded(!sidebarExpanded)}
-          aria-label="Toggle Navigation Sidebar"
-          className="absolute -right-3 top-20 w-6 h-6 bg-[#FAF6EE] border border-[#DDD2C1] rounded-full flex items-center justify-center text-[#7A1C2E] text-xs shadow-sm hover:bg-[#EFE8DC] transition-colors z-50 cursor-pointer"
-        >
-          <span className={`transform transition-transform duration-300 ${sidebarExpanded ? 'rotate-180' : ''}`}>
-            ›
-          </span>
-        </button>
-
-        {/* Navigation items */}
-        <nav className="flex-1 py-4 flex flex-col gap-1 px-2 overflow-y-auto">
-          {/* Home */}
+        {/* Primary Vertical Navigation */}
+        <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+          
+          {/* 1. Home */}
           <Link
             to="/"
-            className={`flex items-center gap-3.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors group ${
-              location.pathname === '/' ? 'bg-[#EFE8DC] text-[#7A1C2E] font-semibold' : 'text-[#3A3530] hover:bg-[#F2ECE1] hover:text-[#7A1C2E]'
+            className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-mono tracking-wider uppercase transition-all duration-150 border-l-2 ${
+              isHome
+                ? 'bg-[#1F1D1A] text-[#FAF6EE] border-[#7A1C2E] font-semibold'
+                : 'text-[#A89F93] border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916]'
             }`}
           >
-            <span className="w-5 text-center text-lg shrink-0">🏛</span>
-            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 hidden'}`}>
-              Home
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm opacity-80">🏛</span>
+              <span>Home</span>
+            </div>
+            {isHome && <span className="text-[10px] text-[#7A1C2E]">✦</span>}
           </Link>
 
-          {/* Explore / Archive */}
+          {/* 2. Explore */}
           <Link
             to="/?q="
-            className={`flex items-center gap-3.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors group ${
-              location.search.includes('q=') ? 'bg-[#EFE8DC] text-[#7A1C2E]' : 'text-[#3A3530] hover:bg-[#F2ECE1] hover:text-[#7A1C2E]'
+            className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-mono tracking-wider uppercase transition-all duration-150 border-l-2 ${
+              isExplore
+                ? 'bg-[#1F1D1A] text-[#FAF6EE] border-[#7A1C2E] font-semibold'
+                : 'text-[#A89F93] border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916]'
             }`}
           >
-            <span className="w-5 text-center text-lg shrink-0">🧭</span>
-            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 hidden'}`}>
-              Explore Archive
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm opacity-80">🧭</span>
+              <span>Explore</span>
+            </div>
+            {isExplore && <span className="text-[10px] text-[#7A1C2E]">✦</span>}
           </Link>
 
-          {/* Categories */}
+          {/* 3. Categories (Interactive Flyout trigger) */}
           <button
             onClick={() => setCategoriesDrawerOpen(!categoriesDrawerOpen)}
-            className="flex items-center gap-3.5 px-3 py-2.5 rounded-md text-sm font-medium text-[#3A3530] hover:bg-[#F2ECE1] hover:text-[#7A1C2E] transition-colors text-left w-full cursor-pointer"
-          >
-            <span className="w-5 text-center text-lg shrink-0">📂</span>
-            <span className={`whitespace-nowrap flex-1 transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 hidden'}`}>
-              Categories
-            </span>
-            {sidebarExpanded && (
-              <span className="text-xs text-[#8F8679]">›</span>
-            )}
-          </button>
-
-          {/* Authors */}
-          <a
-            href="/#authors-section"
-            className="flex items-center gap-3.5 px-3 py-2.5 rounded-md text-sm font-medium text-[#3A3530] hover:bg-[#F2ECE1] hover:text-[#7A1C2E] transition-colors"
-          >
-            <span className="w-5 text-center text-lg shrink-0">🖋</span>
-            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 hidden'}`}>
-              Authors
-            </span>
-          </a>
-
-          {/* Bookmarks */}
-          <Link
-            to="/bookmarks"
-            className={`flex items-center gap-3.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors group ${
-              location.pathname === '/bookmarks' ? 'bg-[#EFE8DC] text-[#7A1C2E]' : 'text-[#3A3530] hover:bg-[#F2ECE1] hover:text-[#7A1C2E]'
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono tracking-wider uppercase transition-all duration-150 border-l-2 cursor-pointer ${
+              categoriesDrawerOpen
+                ? 'bg-[#1F1D1A] text-[#FAF6EE] border-[#A67C48]'
+                : 'text-[#A89F93] border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916]'
             }`}
           >
-            <span className="w-5 text-center text-lg shrink-0">🔖</span>
-            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 hidden'}`}>
-              Bookmarks
+            <div className="flex items-center gap-3">
+              <span className="text-sm opacity-80">📂</span>
+              <span>Categories</span>
+            </div>
+            <span className="text-[11px] text-[#8E857B]">
+              {categoriesDrawerOpen ? '▴' : '›'}
             </span>
+          </button>
+
+          {/* 4. Write */}
+          <Link
+            to="/write"
+            className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-mono tracking-wider uppercase transition-all duration-150 border-l-2 ${
+              isWrite
+                ? 'bg-[#1F1D1A] text-[#FAF6EE] border-[#7A1C2E] font-semibold'
+                : 'text-[#A89F93] border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916]'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-sm opacity-80">✍</span>
+              <span>Write</span>
+            </div>
+            {isWrite && <span className="text-[10px] text-[#7A1C2E]">✦</span>}
           </Link>
 
-          {/* Settings */}
-          {user && (
+          {/* 5. Saved */}
+          <Link
+            to="/bookmarks"
+            className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-mono tracking-wider uppercase transition-all duration-150 border-l-2 ${
+              isSaved
+                ? 'bg-[#1F1D1A] text-[#FAF6EE] border-[#7A1C2E] font-semibold'
+                : 'text-[#A89F93] border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916]'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-sm opacity-80">🔖</span>
+              <span>Saved</span>
+            </div>
+            {isSaved && <span className="text-[10px] text-[#7A1C2E]">✦</span>}
+          </Link>
+
+          {/* 6. Profile */}
+          {user ? (
             <Link
-              to="/edit-profile"
-              className={`flex items-center gap-3.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors group ${
-                location.pathname === '/edit-profile' ? 'bg-[#EFE8DC] text-[#7A1C2E]' : 'text-[#3A3530] hover:bg-[#F2ECE1] hover:text-[#7A1C2E]'
+              to="/profile"
+              className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-mono tracking-wider uppercase transition-all duration-150 border-l-2 ${
+                isProfile
+                  ? 'bg-[#1F1D1A] text-[#FAF6EE] border-[#7A1C2E] font-semibold'
+                  : 'text-[#A89F93] border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916]'
               }`}
             >
-              <span className="w-5 text-center text-lg shrink-0">⚙</span>
-              <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 hidden'}`}>
-                Settings
-              </span>
+              <div className="flex items-center gap-3 truncate">
+                <span className="text-sm opacity-80">👤</span>
+                <span className="truncate">{user.name ? user.name.split(' ')[0] : 'Profile'}</span>
+              </div>
+              {isProfile && <span className="text-[10px] text-[#7A1C2E]">✦</span>}
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center justify-between px-3.5 py-2.5 text-xs font-mono tracking-wider uppercase text-[#A89F93] border-l-2 border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916] transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-sm opacity-80">👤</span>
+                <span>Sign In</span>
+              </div>
+              <span className="text-[10px] text-[#A67C48]">→</span>
             </Link>
           )}
 
-          {/* About */}
-          <button
-            onClick={() => setAboutModalOpen(true)}
-            className="flex items-center gap-3.5 px-3 py-2.5 rounded-md text-sm font-medium text-[#3A3530] hover:bg-[#F2ECE1] hover:text-[#7A1C2E] transition-colors text-left w-full cursor-pointer"
-          >
-            <span className="w-5 text-center text-lg shrink-0">ℹ</span>
-            <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 hidden'}`}>
-              About
-            </span>
-          </button>
+          {/* Admin Console (If authorized) */}
+          {user?.role === 'admin' && (
+            <Link
+              to="/admin"
+              className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-mono tracking-wider uppercase transition-all duration-150 border-l-2 ${
+                isAdmin
+                  ? 'bg-[#1F1D1A] text-[#FAF6EE] border-[#7A1C2E] font-semibold'
+                  : 'text-[#C5A059] border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-sm">🛡</span>
+                <span>Admin</span>
+              </div>
+              {isAdmin && <span className="text-[10px] text-[#7A1C2E]">✦</span>}
+            </Link>
+          )}
+
         </nav>
 
-        {/* Sidebar Footer info */}
-        <div className="p-3 border-t border-[#DDD2C1] text-center overflow-hidden">
-          <div className={`text-[10px] text-[#8F8679] font-mono tracking-wider transition-opacity duration-200 ${sidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>
-            EST. 2026 · ISSUE XXIV
+        {/* Sidebar Divider & Bottom Actions */}
+        <div className="p-3 border-t border-[#282521] space-y-1">
+          
+          {/* Settings */}
+          <Link
+            to={user ? "/edit-profile" : "/login"}
+            className={`flex items-center justify-between px-3.5 py-2 text-xs font-mono tracking-wider uppercase transition-all duration-150 border-l-2 ${
+              isSettings
+                ? 'bg-[#1F1D1A] text-[#FAF6EE] border-[#7A1C2E] font-semibold'
+                : 'text-[#8E857B] border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916]'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-sm opacity-70">⚙</span>
+              <span>Settings</span>
+            </div>
+            {isSettings && <span className="text-[10px] text-[#7A1C2E]">✦</span>}
+          </Link>
+
+          {/* About Trigger */}
+          <button
+            onClick={() => setAboutModalOpen(true)}
+            className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono tracking-wider uppercase text-[#8E857B] border-l-2 border-transparent hover:text-[#FAF6EE] hover:bg-[#1A1916] transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-sm opacity-70">ℹ</span>
+              <span>About IDEAPAD</span>
+            </div>
+            <span className="text-[10px] text-[#6E665D]">›</span>
+          </button>
+
+          {/* Sign Out */}
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono tracking-wider uppercase text-[#8E857B] hover:text-[#7A1C2E] hover:bg-[#1A1916] transition-all cursor-pointer border-l-2 border-transparent"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-sm opacity-70">🚪</span>
+                <span>Sign Out</span>
+              </div>
+            </button>
+          )}
+
+          {/* Publication Tagline */}
+          <div className="pt-3 border-t border-[#22201C] text-[10px] font-mono text-[#6E665D] text-center leading-tight">
+            IDEAS WORTH PUBLISHING
           </div>
+
         </div>
       </aside>
 
-      {/* ─── MOBILE DRAWER OVERLAY ──────────────────────────── */}
-      {mobileDrawerOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-50 bg-[#1A1A1A]/40 backdrop-blur-xs flex"
-          onClick={() => setMobileDrawerOpen(false)}
-        >
-          <div
-            className="w-72 bg-[#FAF6EE] h-full shadow-2xl p-5 flex flex-col justify-between"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div>
-              <div className="flex items-center justify-between pb-4 border-b border-[#DDD2C1]">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-[#7A1C2E] text-[#FAF6EE] flex items-center justify-center font-serif font-bold">
-                    I
-                  </div>
-                  <span className="font-serif font-bold text-xl text-[#1A1A1A]">IdeaPad</span>
-                </div>
-                <button
-                  onClick={() => setMobileDrawerOpen(false)}
-                  className="p-1.5 text-lg text-[#6B6358] hover:text-[#7A1C2E]"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <nav className="py-4 flex flex-col gap-2">
-                <Link to="/" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC]">🏛 Home</Link>
-                <Link to="/?q=" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC]">🧭 Explore</Link>
-                <button
-                  onClick={() => { setCategoriesDrawerOpen(true); setMobileDrawerOpen(false); }}
-                  className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC] text-left"
-                >
-                  📂 Categories
-                </button>
-                <a href="/#authors-section" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC]">🖋 Authors</a>
-                <Link to="/bookmarks" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC]">🔖 Bookmarks</Link>
-                {user ? (
-                  <>
-                    <Link to="/profile" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC]">👤 My Profile</Link>
-                    <Link to="/edit-profile" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC]">⚙ Settings</Link>
-                    {user.role === 'admin' && (
-                      <Link to="/admin" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm text-[#7A1C2E] hover:bg-[#EFE8DC]">🛡 Admin Console</Link>
-                    )}
-                    <button onClick={handleLogout} className="py-2 px-3 rounded text-sm text-left text-[#7A1C2E] hover:bg-[#EFE8DC]">Sign Out</button>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/login" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC]">Sign In</Link>
-                    <Link to="/register" onClick={() => setMobileDrawerOpen(false)} className="py-2 px-3 rounded text-sm hover:bg-[#EFE8DC] text-[#7A1C2E] font-semibold">Join Editorial</Link>
-                  </>
-                )}
-              </nav>
-            </div>
-
-            <div className="pt-4 border-t border-[#DDD2C1] text-xs font-mono text-[#8F8679] text-center">
-              The Independent Voice of Ideas
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── CATEGORIES FLYOUT DRAWER ──────────────────────── */}
+      {/* ════════════════════════════════════════════════════════════
+          CENTRALIZED CATEGORIES MODAL / DRAWER
+          ════════════════════════════════════════════════════════════ */}
       {categoriesDrawerOpen && (
         <div
-          className="fixed inset-0 z-50 bg-[#1A1A1A]/30 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#141311]/50 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setCategoriesDrawerOpen(false)}
         >
           <div
-            className="paper-card w-full max-w-md p-6 bg-[#FAF6EE]"
+            className="w-full max-w-xl bg-[#FAF6EE] border border-[#DDD2C1] shadow-xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-[#DDD2C1] mb-4">
-              <h3 className="font-serif font-bold text-xl text-[#1A1A1A]">Editorial Desks</h3>
+            <div className="flex items-center justify-between pb-3 border-b border-[#DDD2C1] mb-5">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#7A1C2E] font-semibold block">
+                  CATEGORIES
+                </span>
+                <h3 className="font-serif font-black text-2xl text-[#161412] mt-0.5">
+                  Browse by Topic
+                </h3>
+              </div>
               <button
                 onClick={() => setCategoriesDrawerOpen(false)}
-                className="text-[#8F8679] hover:text-[#7A1C2E] text-sm"
+                className="text-sm font-mono text-[#6E665D] hover:text-[#7A1C2E] cursor-pointer p-1"
+                aria-label="Close categories"
               >
-                ✕ Close
+                ✕ CLOSE
               </button>
             </div>
-            <p className="text-xs text-[#6B6358] mb-4 font-body">
-              Select a specialized department to filter essays, opinions, and investigative reports.
+
+            <p className="text-xs font-body text-[#5C554D] mb-6 leading-relaxed">
+              Explore articles, personal stories, and independent essays organized by topic.
             </p>
-            <div className="grid grid-cols-2 gap-2.5">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Link
                 to="/"
                 onClick={() => setCategoriesDrawerOpen(false)}
-                className="py-2 px-3 rounded border border-[#DDD2C1] text-center text-xs font-mono tracking-wider uppercase hover:bg-[#7A1C2E] hover:text-[#FAF6EE] hover:border-[#7A1C2E] transition-colors"
+                className="p-3 border border-[#DDD2C1] bg-[#F7F2E8] hover:border-[#7A1C2E] hover:bg-[#FAF6EE] transition-all flex items-center justify-between group"
               >
-                All Desks
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🏛️</span>
+                  <div>
+                    <h4 className="font-serif font-bold text-sm text-[#161412] group-hover:text-[#7A1C2E] transition-colors">
+                      All Categories
+                    </h4>
+                    <span className="text-[11px] font-body text-[#6E665D] block">
+                      Browse all published articles
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs font-mono text-[#A67C48]">›</span>
               </Link>
+
               {CATEGORIES.map(cat => (
                 <Link
-                  key={cat}
-                  to={`/?genre=${cat}`}
+                  key={cat.id}
+                  to={`/?genre=${cat.name}`}
                   onClick={() => setCategoriesDrawerOpen(false)}
-                  className="py-2 px-3 rounded border border-[#DDD2C1] text-center text-xs font-mono tracking-wider uppercase hover:bg-[#7A1C2E] hover:text-[#FAF6EE] hover:border-[#7A1C2E] transition-colors"
+                  className="p-3 border border-[#DDD2C1] bg-[#FAF6EE] hover:border-[#7A1C2E] hover:bg-[#EFE8DC] transition-all flex items-center justify-between group"
                 >
-                  {cat}
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{cat.icon}</span>
+                    <div>
+                      <h4 className="font-serif font-bold text-sm text-[#161412] group-hover:text-[#7A1C2E] transition-colors">
+                        {cat.name}
+                      </h4>
+                      <span className="text-[11px] font-body text-[#6E665D] block line-clamp-1">
+                        {cat.desc}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono text-[#A67C48]">›</span>
                 </Link>
               ))}
             </div>
@@ -333,39 +354,43 @@ export default function EditorialLayout({ children }) {
         </div>
       )}
 
-      {/* ─── ABOUT MODAL ────────────────────────────────────── */}
+      {/* ════════════════════════════════════════════════════════════
+          ABOUT IDEAPAD MODAL
+          ════════════════════════════════════════════════════════════ */}
       {aboutModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-[#1A1A1A]/40 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#141311]/50 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setAboutModalOpen(false)}
         >
           <div
-            className="paper-card max-w-lg w-full p-7 bg-[#FAF6EE] border-2 border-[#DDD2C1] shadow-2xl relative"
+            className="w-full max-w-lg bg-[#FAF6EE] border border-[#DDD2C1] shadow-2xl p-7 sm:p-9 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setAboutModalOpen(false)}
-              className="absolute top-4 right-4 text-[#8F8679] hover:text-[#7A1C2E] text-base"
+              className="absolute top-5 right-5 text-sm font-mono text-[#6E665D] hover:text-[#7A1C2E] cursor-pointer"
             >
               ✕
             </button>
-            <div className="text-center mb-5">
-              <div className="w-12 h-12 mx-auto rounded-full bg-[#7A1C2E] text-[#FAF6EE] font-serif font-black text-2xl flex items-center justify-center mb-2 shadow-sm">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 mx-auto rounded-xs bg-[#7A1C2E] text-[#FAF6EE] font-serif font-black text-2xl flex items-center justify-center mb-2 shadow-xs">
                 I
               </div>
-              <h2 className="font-serif font-black text-3xl text-[#1A1A1A]">IdeaPad</h2>
-              <p className="byline text-xs text-[#C5A059] mt-1">The Independent Voice of Ideas</p>
-              <div className="vintage-rule-double my-4"></div>
+              <h2 className="font-serif font-black text-3xl text-[#161412]">IDEAPAD</h2>
+              <p className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#A67C48] mt-1 font-semibold">
+                A Place for Ideas Worth Publishing
+              </p>
+              <div className="editorial-rule-double my-4"></div>
             </div>
-            <div className="space-y-3 text-sm leading-relaxed text-[#3A3530] font-body">
+            <div className="space-y-3.5 text-sm leading-relaxed text-[#35312C] font-body">
               <p>
-                <strong>IdeaPad</strong> is an independent editorial salon and publication platform. Rooted in the timeless aesthetic of historic broadsheets and twentieth-century literary reviews, we provide a haven for considered thought.
+                <strong>IDEAPAD</strong> is an independent editorial publishing platform built for thoughtful writers and curious readers. Designed with classic editorial typography and paper aesthetics, it provides a clean, focused reading and writing environment.
               </p>
               <p>
-                Every dispatch is published without distracting popups, algorithmic noise, or neon clutter. Here, writing breathes upon ivory paper, with ink that commands respect.
+                Anyone can join, compose essays, and publish articles on technology, culture, design, and ideas without algorithmic noise or clutter.
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-[#DDD2C1] flex items-center justify-between text-xs text-[#8F8679] font-mono">
+            <div className="mt-6 pt-4 border-t border-[#DDD2C1] flex items-center justify-between text-xs text-[#8E857B] font-mono">
               <span>EST. 2026</span>
               <span>DEVOTED TO THE WRITTEN WORD</span>
             </div>
@@ -373,27 +398,128 @@ export default function EditorialLayout({ children }) {
         </div>
       )}
 
-      {/* ─── STICKY TOP HEADER ──────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-[#F7F1E8]/95 backdrop-blur-md border-b border-[#DDD2C1] md:pl-16 transition-all duration-300">
+      {/* ════════════════════════════════════════════════════════════
+          MOBILE NAVIGATION DRAWER (Phones and small tablets)
+          ════════════════════════════════════════════════════════════ */}
+      {mobileDrawerOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-[#141311]/60 backdrop-blur-xs flex"
+          onClick={() => setMobileDrawerOpen(false)}
+        >
+          <div
+            className="w-72 bg-[#141311] h-full shadow-2xl p-5 flex flex-col justify-between text-[#FAF6EE] border-r border-[#282521]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-[#282521]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xs bg-[#7A1C2E] text-[#FAF6EE] flex items-center justify-center font-serif font-bold text-sm">
+                    I
+                  </div>
+                  <div>
+                    <span className="font-serif font-bold text-lg text-[#FAF6EE] block leading-none">
+                      IDEAPAD
+                    </span>
+                    <span className="text-[8px] font-mono uppercase tracking-widest text-[#A67C48]">
+                      Publishing
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="p-1.5 text-sm font-mono text-[#8E857B] hover:text-[#FAF6EE]"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Mobile Navigation List */}
+              <nav className="py-4 flex flex-col gap-1 text-xs font-mono uppercase tracking-wider">
+                <Link to="/" onClick={() => setMobileDrawerOpen(false)} className={`py-2.5 px-3 rounded-xs flex items-center gap-3 ${isHome ? 'bg-[#1F1D1A] text-[#FAF6EE] border-l-2 border-[#7A1C2E]' : 'text-[#A89F93] hover:bg-[#1A1916]'}`}>
+                  <span>🏛</span> Home
+                </Link>
+                <Link to="/?q=" onClick={() => setMobileDrawerOpen(false)} className={`py-2.5 px-3 rounded-xs flex items-center gap-3 ${isExplore ? 'bg-[#1F1D1A] text-[#FAF6EE] border-l-2 border-[#7A1C2E]' : 'text-[#A89F93] hover:bg-[#1A1916]'}`}>
+                  <span>🧭</span> Explore
+                </Link>
+                <button
+                  onClick={() => { setCategoriesDrawerOpen(true); setMobileDrawerOpen(false); }}
+                  className="py-2.5 px-3 rounded-xs flex items-center justify-between text-[#A89F93] hover:bg-[#1A1916] text-left cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <span>📂</span> Categories
+                  </div>
+                  <span className="text-xs">›</span>
+                </button>
+                <Link to="/write" onClick={() => setMobileDrawerOpen(false)} className={`py-2.5 px-3 rounded-xs flex items-center gap-3 ${isWrite ? 'bg-[#1F1D1A] text-[#FAF6EE] border-l-2 border-[#7A1C2E]' : 'text-[#A89F93] hover:bg-[#1A1916]'}`}>
+                  <span>✍</span> Write
+                </Link>
+                <Link to="/bookmarks" onClick={() => setMobileDrawerOpen(false)} className={`py-2.5 px-3 rounded-xs flex items-center gap-3 ${isSaved ? 'bg-[#1F1D1A] text-[#FAF6EE] border-l-2 border-[#7A1C2E]' : 'text-[#A89F93] hover:bg-[#1A1916]'}`}>
+                  <span>🔖</span> Saved
+                </Link>
+
+                <div className="border-t border-[#282521] my-2"></div>
+
+                {user ? (
+                  <>
+                    <Link to="/profile" onClick={() => setMobileDrawerOpen(false)} className="py-2.5 px-3 rounded-xs flex items-center gap-3 text-[#A89F93] hover:bg-[#1A1916]">
+                      <span>👤</span> My Profile
+                    </Link>
+                    <Link to="/edit-profile" onClick={() => setMobileDrawerOpen(false)} className="py-2.5 px-3 rounded-xs flex items-center gap-3 text-[#A89F93] hover:bg-[#1A1916]">
+                      <span>⚙</span> Settings
+                    </Link>
+                    {user.role === 'admin' && (
+                      <Link to="/admin" onClick={() => setMobileDrawerOpen(false)} className="py-2.5 px-3 rounded-xs flex items-center gap-3 text-[#C5A059] hover:bg-[#1A1916]">
+                        <span>🛡</span> Admin
+                      </Link>
+                    )}
+                    <button onClick={handleLogout} className="py-2.5 px-3 rounded-xs flex items-center gap-3 text-[#7A1C2E] hover:bg-[#1A1916] text-left cursor-pointer">
+                      <span>🚪</span> Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setMobileDrawerOpen(false)} className="py-2.5 px-3 rounded-xs flex items-center gap-3 text-[#A89F93] hover:bg-[#1A1916]">
+                      <span>👤</span> Sign In
+                    </Link>
+                    <Link to="/register" onClick={() => setMobileDrawerOpen(false)} className="py-2.5 px-3 rounded-xs flex items-center gap-3 text-[#7A1C2E] font-semibold hover:bg-[#1A1916]">
+                      <span>✦</span> Create Account
+                    </Link>
+                  </>
+                )}
+              </nav>
+            </div>
+
+            <div className="pt-4 border-t border-[#282521] text-[10px] font-mono text-[#8E857B] text-center">
+              A PLACE FOR IDEAS WORTH PUBLISHING
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════
+          STREAMLINED TOP HEADER
+          ════════════════════════════════════════════════════════════ */}
+      <header className="sticky top-0 z-30 bg-[#F7F2E8]/95 backdrop-blur-xs border-b border-[#DDD2C1] md:pl-60 transition-all duration-200">
         
-        {/* Editorial Sub-bar (Date & Subtitle) */}
-        <div className="hidden lg:flex items-center justify-between px-6 py-1 border-b border-[#EFE8DC] text-[11px] font-mono text-[#6B6358]">
+        {/* Top date bar */}
+        <div className="hidden lg:flex items-center justify-between px-6 py-1 border-b border-[#EFE8DC] text-[10px] font-mono text-[#6E665D]">
           <span>{today.toUpperCase()}</span>
-          <span className="tracking-widest uppercase text-[#7A1C2E] font-semibold">
-            ✦ THE INDEPENDENT VOICE OF IDEAS ✦
+          <span className="tracking-[0.25em] uppercase text-[#7A1C2E] font-semibold">
+            ✦ A PLACE FOR IDEAS WORTH PUBLISHING ✦
           </span>
-          <span>EDITION NO. 142</span>
+          <span>EDITION 142</span>
         </div>
 
-        {/* Main Header Bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        {/* Top Action Bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           
-          {/* Mobile hamburger toggle */}
+          {/* Mobile hamburger & brand name */}
           <div className="flex items-center gap-3 md:hidden">
             <button
               onClick={() => setMobileDrawerOpen(true)}
-              className="p-2 text-[#1A1A1A] hover:text-[#7A1C2E]"
-              aria-label="Open navigation drawer"
+              className="p-1.5 text-[#161412] hover:text-[#7A1C2E] cursor-pointer"
+              aria-label="Open mobile menu"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="3" y1="6" x2="21" y2="6"/>
@@ -401,41 +527,29 @@ export default function EditorialLayout({ children }) {
                 <line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
             </button>
-            <Link to="/" className="font-serif font-black text-2xl tracking-tight text-[#1A1A1A]">
-              IdeaPad
+            <Link to="/" className="font-serif font-black text-xl tracking-tight text-[#161412]">
+              IDEAPAD
             </Link>
           </div>
 
-          {/* Desktop Grand Masthead Logo */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link to="/" className="group flex items-center gap-2.5">
-              <h1 className="font-serif font-black text-3xl tracking-tight text-[#1A1A1A] group-hover:text-[#7A1C2E] transition-colors">
-                IdeaPad
-              </h1>
-              <span className="text-[10px] px-1.5 py-0.5 border border-[#C5A059] text-[#8C6D2B] font-mono uppercase tracking-wider rounded">
-                Gazette
-              </span>
-            </Link>
-          </div>
-
-          {/* Center: Search Bar */}
-          <div className="flex-1 max-w-md mx-2 sm:mx-6">
+          {/* Center search bar */}
+          <div className="flex-1 max-w-md mx-2 sm:mx-4">
             <form onSubmit={handleSearchSubmit} className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8F8679] text-sm">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8E857B] text-xs">
                 🔍
               </span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search archive, essays, authors..."
-                className="w-full pl-9 pr-8 py-1.5 bg-[#FAF6EE] border border-[#DDD2C1] rounded-full text-xs sm:text-sm font-body text-[#1A1A1A] focus:outline-none focus:border-[#7A1C2E] focus:ring-2 focus:ring-[#7A1C2E]/10 transition-all placeholder:font-mono placeholder:text-[#8F8679]"
+                placeholder="Search articles, topics, authors..."
+                className="w-full pl-8 pr-7 py-1.5 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs font-body text-[#161412] focus:outline-none focus:border-[#7A1C2E] placeholder:font-mono placeholder:text-[#8E857B] transition-colors"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8F8679] hover:text-[#7A1C2E]"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#8E857B] hover:text-[#7A1C2E] cursor-pointer"
                 >
                   ✕
                 </button>
@@ -443,151 +557,85 @@ export default function EditorialLayout({ children }) {
             </form>
           </div>
 
-          {/* Right Action Icons & Controls */}
+          {/* Right Header Actions */}
           <div className="flex items-center gap-3 shrink-0">
             
-            {/* Notification Bell */}
+            {/* Notification trigger */}
             <div className="relative">
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="p-2 text-[#3A3530] hover:text-[#7A1C2E] transition-colors relative cursor-pointer"
-                aria-label="Editorial Notifications"
+                className="p-1.5 text-[#35312C] hover:text-[#7A1C2E] transition-colors cursor-pointer relative"
+                aria-label="Notifications"
               >
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
-                {/* Vintage notification dot */}
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#7A1C2E] ring-2 ring-[#FAF6EE]"></span>
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#7A1C2E]"></span>
               </button>
 
-              {/* Notification Popover */}
               {notificationsOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-80 paper-card p-4 shadow-xl z-50 bg-[#FAF6EE] border border-[#DDD2C1] fade-in"
+                  className="absolute right-0 mt-2 w-72 bg-[#FAF6EE] border border-[#DDD2C1] shadow-xl p-4 z-50 fade-in"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-center justify-between pb-2 border-b border-[#DDD2C1] mb-3">
-                    <span className="font-serif font-bold text-sm text-[#1A1A1A]">Editorial Notices</span>
-                    <span className="text-[10px] font-mono text-[#7A1C2E]">LATEST DISPATCHES</span>
+                  <div className="flex items-center justify-between pb-2 border-b border-[#DDD2C1] mb-2.5">
+                    <span className="font-serif font-bold text-xs text-[#161412]">Latest Updates</span>
+                    <span className="text-[9px] font-mono text-[#7A1C2E] uppercase">Notices</span>
                   </div>
-                  <div className="space-y-3">
-                    <div className="p-2.5 rounded bg-[#EFE8DC]/60 border border-[#DDD2C1]/70">
-                      <p className="text-xs font-bold text-[#1A1A1A]">📰 New Edition Released</p>
-                      <p className="text-[11px] text-[#6B6358] mt-0.5">Explore featured essays and dispatches across arts and sciences.</p>
-                      <span className="text-[9px] font-mono text-[#8F8679] mt-1 block">Just now</span>
-                    </div>
-                    <div className="p-2.5 rounded bg-[#FAF6EE]">
-                      <p className="text-xs font-bold text-[#1A1A1A]">✍ Writer's Guild Open</p>
-                      <p className="text-[11px] text-[#6B6358] mt-0.5">Publish your voice to thousands of discerning readers today.</p>
-                      <span className="text-[9px] font-mono text-[#8F8679] mt-1 block">2 hours ago</span>
+                  <div className="space-y-2.5 text-left">
+                    <div className="p-2 border border-[#DDD2C1] bg-[#F7F2E8]">
+                      <p className="text-xs font-bold text-[#161412]">📰 Fresh Edition Published</p>
+                      <p className="text-[11px] text-[#5C554D] mt-0.5">Check out trending articles across technology, culture, and science.</p>
+                      <span className="text-[9px] font-mono text-[#8E857B] mt-1 block">Edition No. 142</span>
                     </div>
                   </div>
                   <button
                     onClick={() => setNotificationsOpen(false)}
-                    className="w-full text-center mt-3 pt-2 border-t border-[#DDD2C1] text-[11px] font-mono text-[#7A1C2E] hover:underline"
+                    className="w-full text-center mt-2.5 pt-2 border-t border-[#DDD2C1] text-[10px] font-mono text-[#7A1C2E] hover:underline cursor-pointer"
                   >
-                    Close Notices
+                    Dismiss
                   </button>
                 </div>
               )}
             </div>
 
-            {/* "Write Blog" Button — Newspaper Stamp Styled */}
+            {/* Write CTA */}
             <Link
               to="/write"
-              className="stamp-btn hidden sm:inline-flex text-xs"
+              className="stamp-btn text-[11px] py-1.5 px-3.5 hidden sm:inline-flex"
             >
-              <span>✍</span> Write Dispatch
+              <span>✍</span> Write
             </Link>
 
-            {/* User Profile Avatar / Sign In */}
+            {/* Auth / Profile avatar */}
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
-                  className="flex items-center gap-2 p-1 rounded-full border border-[#DDD2C1] hover:border-[#7A1C2E] transition-colors bg-[#FAF6EE]"
-                >
-                  <div className="w-8 h-8 rounded-full bg-[#EFE8DC] border border-[#C5A059] flex items-center justify-center font-serif font-bold text-sm text-[#7A1C2E]">
-                    {user.name ? user.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase() || 'C'}
-                  </div>
-                </button>
-
-                {/* Avatar Menu Dropdown */}
-                {avatarMenuOpen && (
-                  <div
-                    className="absolute right-0 mt-2 w-56 paper-card py-2 px-1 shadow-xl z-50 bg-[#FAF6EE] border border-[#DDD2C1] fade-in"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="px-3 py-2 border-b border-[#DDD2C1] mb-1">
-                      <p className="text-xs font-mono text-[#8F8679]">CORRESPONDENT</p>
-                      <p className="text-sm font-bold text-[#1A1A1A] truncate">{user.name || user.email}</p>
-                    </div>
-
-                    <Link
-                      to="/profile"
-                      onClick={() => setAvatarMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#3A3530] hover:bg-[#EFE8DC] hover:text-[#7A1C2E] rounded transition-colors"
-                    >
-                      <span>👤</span> My Dossier / Posts
-                    </Link>
-                    <Link
-                      to="/bookmarks"
-                      onClick={() => setAvatarMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#3A3530] hover:bg-[#EFE8DC] hover:text-[#7A1C2E] rounded transition-colors"
-                    >
-                      <span>🔖</span> Saved Clippings
-                    </Link>
-                    <Link
-                      to="/edit-profile"
-                      onClick={() => setAvatarMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#3A3530] hover:bg-[#EFE8DC] hover:text-[#7A1C2E] rounded transition-colors"
-                    >
-                      <span>⚙</span> Author Credentials
-                    </Link>
-
-                    {user.role === 'admin' && (
-                      <Link
-                        to="/admin"
-                        onClick={() => setAvatarMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#7A1C2E] font-semibold hover:bg-[#EFE8DC] rounded transition-colors"
-                      >
-                        <span>🛡</span> Editor-in-Chief Desk
-                      </Link>
-                    )}
-
-                    <div className="border-t border-[#DDD2C1] my-1"></div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-[#7A1C2E] hover:bg-[#EFE8DC] rounded transition-colors text-left"
-                    >
-                      <span>🚪</span> Sign Out
-                    </button>
-                  </div>
-                )}
-              </div>
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 p-1 rounded-xs border border-[#DDD2C1] hover:border-[#7A1C2E] bg-[#FAF6EE] transition-colors"
+                title={user.name || user.email}
+              >
+                <div className="w-7 h-7 rounded-xs bg-[#EFE8DC] border border-[#DDD2C1] flex items-center justify-center font-serif font-bold text-xs text-[#7A1C2E]">
+                  {user.name ? user.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase() || 'U'}
+                </div>
+              </Link>
             ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="ink-btn-ghost text-xs px-3 py-1.5"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="stamp-btn text-xs px-3 py-1.5"
-                >
-                  Subscribe
-                </Link>
-              </div>
+              <Link
+                to="/login"
+                className="editorial-btn-secondary text-[11px] py-1.5 px-3"
+              >
+                Sign In
+              </Link>
             )}
+
           </div>
         </div>
       </header>
 
-      {/* ─── MAIN CONTENT AREA ──────────────────────────────── */}
-      <div className="flex-1 flex flex-col md:pl-16 transition-all duration-300">
+      {/* ════════════════════════════════════════════════════════════
+          MAIN CONTENT AREA
+          ════════════════════════════════════════════════════════════ */}
+      <div className="flex-1 flex flex-col md:pl-60 transition-all duration-200">
         <main className="flex-1 w-full">
           {children}
         </main>

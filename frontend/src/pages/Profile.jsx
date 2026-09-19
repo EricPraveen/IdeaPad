@@ -74,28 +74,28 @@ export default function Profile() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       
       {/* ─── CORRESPONDENT DOSSIER HEADER ─────────────────── */}
-      <div className="paper-card p-6 sm:p-8 bg-[#FAF6EE] border-2 border-[#DDD2C1] shadow-md">
+      <div className="p-6 sm:p-8 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs shadow-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-6 border-b border-[#DDD2C1]">
           
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-full bg-[#EFE8DC] border-2 border-[#C5A059] flex items-center justify-center font-serif font-black text-3xl text-[#7A1C2E] shadow-sm shrink-0">
+            <div className="w-18 h-18 rounded-xs bg-[#EFE8DC] border border-[#DDD2C1] flex items-center justify-center font-serif font-black text-2xl text-[#7A1C2E] shadow-xs shrink-0">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#7A1C2E] px-2 py-0.5 border border-[#7A1C2E] rounded">
-                  ACCIDENTAL WRITER · CORRESPONDENT
+                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7A1C2E] px-2 py-0.5 border border-[#7A1C2E] rounded-xs font-semibold">
+                  MY PROFILE
                 </span>
                 {user?.role === 'admin' && (
-                  <span className="text-[10px] font-mono uppercase tracking-widest bg-[#7A1C2E] text-[#FAF6EE] px-2 py-0.5 rounded">
-                    EDITOR-IN-CHIEF
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] bg-[#7A1C2E] text-[#FAF6EE] px-2 py-0.5 rounded-xs font-semibold">
+                    ADMIN
                   </span>
                 )}
               </div>
-              <h1 className="font-serif font-black text-2xl sm:text-3xl text-[#1A1A1A] mt-1">
-                {user?.name || 'Fellow Correspondent'}
+              <h1 className="font-serif font-black text-2xl sm:text-3xl text-[#161412] mt-1">
+                {user?.name || 'Writer'}
               </h1>
-              <p className="font-mono text-xs text-[#8F8679] mt-0.5">
+              <p className="font-mono text-xs text-[#8E857B] mt-0.5">
                 @{user?.username || user?.email?.split('@')[0]} · {user?.email}
               </p>
             </div>
@@ -104,40 +104,40 @@ export default function Profile() {
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <Link
               to="/edit-profile"
-              className="ink-btn-ghost text-xs py-2 px-4 flex-1 sm:flex-none text-center"
+              className="editorial-btn-secondary text-xs py-2 px-4 flex-1 sm:flex-none text-center"
             >
               ⚙ Edit Profile
             </Link>
             <Link
               to="/write"
-              className="stamp-btn text-xs py-2 px-4 flex-1 sm:flex-none text-center"
+              className="editorial-btn-primary text-xs py-2 px-4 flex-1 sm:flex-none text-center"
             >
-              ✍ New Dispatch
+              ✍ New Article
             </Link>
           </div>
 
         </div>
 
-        {/* Bio */}
+        {/* Bio quote if provided */}
         {user?.bio && (
-          <p className="font-body text-sm text-[#3A3530] mt-4 leading-relaxed max-w-3xl">
+          <p className="font-body text-sm text-[#35312C] mt-4 leading-relaxed max-w-3xl italic">
             "{user.bio}"
           </p>
         )}
 
-        {/* Correspondent Stats */}
+        {/* Correspondent Stats Ledger */}
         <div className="grid grid-cols-3 gap-4 pt-6 mt-6 border-t border-[#DDD2C1] text-center">
           <div>
-            <div className="font-serif font-bold text-2xl text-[#1A1A1A]">{posts.length}</div>
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8F8679]">Published</div>
+            <div className="font-serif font-bold text-2xl text-[#161412]">{posts.length}</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8E857B]">Published</div>
           </div>
           <div>
             <div className="font-serif font-bold text-2xl text-[#7A1C2E]">{drafts.length}</div>
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8F8679]">Drafts</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8E857B]">Drafts</div>
           </div>
           <div>
-            <div className="font-serif font-bold text-2xl text-[#C5A059]">{totalLikes}</div>
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8F8679]">Total Endorsements</div>
+            <div className="font-serif font-bold text-2xl text-[#A67C48]">{totalLikes}</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[#8E857B]">Likes</div>
           </div>
         </div>
 
@@ -148,23 +148,23 @@ export default function Profile() {
         <div className="flex items-center gap-4 border-b border-[#DDD2C1] mb-6">
           <button
             onClick={() => setActiveTab('published')}
-            className={`pb-3 text-sm font-mono tracking-wider uppercase border-b-2 transition-colors cursor-pointer ${
+            className={`pb-3 text-xs font-mono tracking-wider uppercase border-b-2 transition-colors cursor-pointer ${
               activeTab === 'published'
                 ? 'border-[#7A1C2E] text-[#7A1C2E] font-bold'
-                : 'border-transparent text-[#8F8679] hover:text-[#1A1A1A]'
+                : 'border-transparent text-[#8E857B] hover:text-[#161412]'
             }`}
           >
-            Published Dispatches ({posts.length})
+            Published Articles ({posts.length})
           </button>
           <button
             onClick={() => setActiveTab('drafts')}
-            className={`pb-3 text-sm font-mono tracking-wider uppercase border-b-2 transition-colors cursor-pointer ${
+            className={`pb-3 text-xs font-mono tracking-wider uppercase border-b-2 transition-colors cursor-pointer ${
               activeTab === 'drafts'
                 ? 'border-[#7A1C2E] text-[#7A1C2E] font-bold'
-                : 'border-transparent text-[#8F8679] hover:text-[#1A1A1A]'
+                : 'border-transparent text-[#8E857B] hover:text-[#161412]'
             }`}
           >
-            Draft Manuscripts ({drafts.length})
+            Drafts ({drafts.length})
           </button>
         </div>
 
@@ -172,20 +172,20 @@ export default function Profile() {
         {activeTab === 'published' && (
           <div>
             {loading ? (
-              <div className="py-16 text-center text-xs font-mono text-[#8F8679]">
-                Gathering dispatches…
+              <div className="py-16 text-center text-xs font-mono text-[#8E857B]">
+                Loading articles…
               </div>
             ) : posts.length === 0 ? (
-              <div className="paper-card p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE]">
+              <div className="p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs">
                 <span className="text-4xl block mb-2 opacity-50">📰</span>
-                <h3 className="font-serif font-bold text-lg text-[#1A1A1A] mb-1">
+                <h3 className="font-serif font-bold text-lg text-[#161412] mb-1">
                   No published stories yet
                 </h3>
-                <p className="font-body text-xs text-[#6B6358] mb-4">
-                  Share your perspectives, reports, and reflections with the Gazette.
+                <p className="font-body text-xs text-[#5C554D] mb-4">
+                  Share your perspectives, reports, and reflections with the publication.
                 </p>
-                <Link to="/write" className="stamp-btn text-xs">
-                  Compose First Article
+                <Link to="/write" className="editorial-btn-primary text-xs">
+                  Write First Article
                 </Link>
               </div>
             ) : (
@@ -207,15 +207,15 @@ export default function Profile() {
         {activeTab === 'drafts' && (
           <div>
             {drafts.length === 0 ? (
-              <div className="paper-card p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE]">
+              <div className="p-10 text-center max-w-md mx-auto my-8 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs">
                 <span className="text-4xl block mb-2 opacity-50">📝</span>
-                <h3 className="font-serif font-bold text-lg text-[#1A1A1A] mb-1">
+                <h3 className="font-serif font-bold text-lg text-[#161412] mb-1">
                   No pending drafts
                 </h3>
-                <p className="font-body text-xs text-[#6B6358] mb-4">
-                  All your thoughts have either been released to the press or not yet begun.
+                <p className="font-body text-xs text-[#5C554D] mb-4">
+                  All your ideas have either been published or not yet drafted.
                 </p>
-                <Link to="/write" className="stamp-btn text-xs">
+                <Link to="/write" className="editorial-btn-primary text-xs">
                   Start a Draft
                 </Link>
               </div>
@@ -224,21 +224,21 @@ export default function Profile() {
                 {drafts.map(draft => (
                   <div
                     key={draft.id}
-                    className="paper-card p-5 bg-[#FAF6EE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    className="p-5 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#C5A059] border border-[#C5A059] px-1.5 py-0.5 rounded">
+                        <span className="text-[9px] font-mono uppercase tracking-wider text-[#A67C48] border border-[#C5A059] px-1.5 py-0.5 rounded-xs">
                           Draft
                         </span>
-                        <span className="text-xs font-mono text-[#8F8679]">
+                        <span className="text-xs font-mono text-[#8E857B]">
                           {draft.genre || 'General'}
                         </span>
                       </div>
-                      <h4 className="font-serif font-bold text-lg text-[#1A1A1A]">
-                        {draft.title || 'Untitled Manuscript'}
+                      <h4 className="font-serif font-bold text-lg text-[#161412]">
+                        {draft.title || 'Untitled Draft'}
                       </h4>
-                      <p className="font-body text-xs text-[#6B6358] line-clamp-1 mt-1">
+                      <p className="font-body text-xs text-[#5C554D] line-clamp-1 mt-1">
                         {draft.content?.replace(/<[^>]+>/g, '') || 'No content yet…'}
                       </p>
                     </div>
@@ -246,19 +246,19 @@ export default function Profile() {
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => navigate(`/write?edit=${draft.id}`)}
-                        className="ink-btn-ghost text-xs py-1.5 px-3"
+                        className="editorial-btn-secondary text-xs py-1.5 px-3 cursor-pointer"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handlePublish(draft.id)}
-                        className="stamp-btn text-xs py-1.5 px-3"
+                        className="editorial-btn-primary text-xs py-1.5 px-3 cursor-pointer"
                       >
                         Publish
                       </button>
                       <button
                         onClick={() => handleDeleteDraft(draft.id)}
-                        className="text-xs font-mono text-[#7A1C2E] hover:underline px-2"
+                        className="text-xs font-mono text-[#7A1C2E] hover:underline px-2 cursor-pointer"
                       >
                         Delete
                       </button>
