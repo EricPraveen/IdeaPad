@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import ThemeToggle from './ThemeToggle'
 
 const genres = ['Technology', 'Travel', 'Food', 'Lifestyle', 'Fiction', 'Opinion', 'Health', 'Finance', 'Culture']
 
@@ -66,6 +67,7 @@ export default function Navbar() {
                             </Link>
                         </>
                     )}
+                    <ThemeToggle />
                     <button
                         onClick={() => setSearchOpen(!searchOpen)}
                         aria-label="Search"

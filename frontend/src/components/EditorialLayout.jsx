@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { CATEGORIES } from '../constants/categories'
 import Footer from './Footer'
+import ThemeToggle from './ThemeToggle'
 
 export default function EditorialLayout({ children }) {
   const { user, logoutUser } = useAuth()
@@ -223,8 +224,14 @@ export default function EditorialLayout({ children }) {
         </nav>
 
         {/* Sidebar Divider & Bottom Actions */}
-        <div className="p-3 border-t border-[#282521] space-y-1">
+        <div className="p-3 border-t border-[#282521] space-y-2">
           
+          {/* Theme Switcher in Sidebar */}
+          <div className="px-3.5 py-1.5 flex items-center justify-between text-xs font-mono tracking-wider uppercase text-[#8E857B]">
+            <span>Theme</span>
+            <ThemeToggle showLabel />
+          </div>
+
           {/* Settings */}
           <Link
             to={user ? "/edit-profile" : "/login"}
@@ -436,6 +443,10 @@ export default function EditorialLayout({ children }) {
 
               {/* Mobile Navigation List */}
               <nav className="py-4 flex flex-col gap-1 text-xs font-mono uppercase tracking-wider">
+                <div className="py-2 px-3 flex items-center justify-between border-b border-[#282521] mb-2">
+                  <span className="text-[10px] text-[#A67C48] tracking-widest uppercase">EDITION THEME</span>
+                  <ThemeToggle showLabel />
+                </div>
                 <Link to="/" onClick={() => setMobileDrawerOpen(false)} className={`py-2.5 px-3 rounded-xs flex items-center gap-3 ${isHome ? 'bg-[#1F1D1A] text-[#FAF6EE] border-l-2 border-[#7A1C2E]' : 'text-[#A89F93] hover:bg-[#1A1916]'}`}>
                   <span>🏛</span> Home
                 </Link>
@@ -559,6 +570,9 @@ export default function EditorialLayout({ children }) {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-3 shrink-0">
+
+            {/* Global Theme Switcher */}
+            <ThemeToggle />
             
             {/* Notification trigger */}
             <div className="relative">
