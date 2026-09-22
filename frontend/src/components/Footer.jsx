@@ -17,7 +17,7 @@ export default function Footer() {
           <p className="text-xs tracking-[0.28em] text-[#A67C48] mt-2 uppercase font-mono">
             A place for ideas worth publishing.
           </p>
-          <div className="w-16 h-px bg-[#7A1C2E] mx-auto mt-4"></div>
+          <div className="w-16 h-px bg-[var(--accent-primary)] mx-auto mt-4"></div>
         </div>
 
         {/* 3-Column Directory */}
@@ -31,22 +31,22 @@ export default function Footer() {
             <ul className="space-y-2.5">
               <li>
                 <Link to="/" className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2">
-                  <span className="text-[#7A1C2E]">›</span> Home
+                  <span className="text-[var(--accent-primary)]">›</span> Home
                 </Link>
               </li>
               <li>
                 <Link to="/write" className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2">
-                  <span className="text-[#7A1C2E]">›</span> Write Article
+                  <span className="text-[var(--accent-primary)]">›</span> Write Article
                 </Link>
               </li>
               <li>
                 <Link to="/bookmarks" className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2">
-                  <span className="text-[#7A1C2E]">›</span> Saved Articles
+                  <span className="text-[var(--accent-primary)]">›</span> Saved Articles
                 </Link>
               </li>
               <li>
                 <Link to="/profile" className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2">
-                  <span className="text-[#7A1C2E]">›</span> Author Profile
+                  <span className="text-[var(--accent-primary)]">›</span> Author Profile
                 </Link>
               </li>
             </ul>
@@ -60,22 +60,22 @@ export default function Footer() {
             <ul className="space-y-2.5">
               <li>
                 <a href="#about" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2">
-                  <span className="text-[#7A1C2E]">›</span> About IDEAPAD
+                  <span className="text-[var(--accent-primary)]">›</span> About IDEAPAD
                 </a>
               </li>
               <li>
                 <a href="mailto:editor@ideapad.press" className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2">
-                  <span className="text-[#7A1C2E]">›</span> Contact Us
+                  <span className="text-[var(--accent-primary)]">›</span> Contact Us
                 </a>
               </li>
               <li>
                 <Link to="/#authors-section" className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2">
-                  <span className="text-[#7A1C2E]">›</span> Writers &amp; Authors
+                  <span className="text-[var(--accent-primary)]">›</span> Writers &amp; Authors
                 </Link>
               </li>
               <li>
                 <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2">
-                  <span className="text-[#7A1C2E]">›</span> Source Code
+                  <span className="text-[var(--accent-primary)]">›</span> Source Code
                 </a>
               </li>
             </ul>
@@ -89,17 +89,17 @@ export default function Footer() {
             <ul className="space-y-2.5">
               <li>
                 <span className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2 cursor-pointer">
-                  <span className="text-[#7A1C2E]">›</span> Privacy Policy
+                  <span className="text-[var(--accent-primary)]">›</span> Privacy Policy
                 </span>
               </li>
               <li>
                 <span className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2 cursor-pointer">
-                  <span className="text-[#7A1C2E]">›</span> Terms of Service
+                  <span className="text-[var(--accent-primary)]">›</span> Terms of Service
                 </span>
               </li>
               <li>
                 <span className="text-[#A89F93] hover:text-[#FAF6EE] transition-colors flex items-center gap-2 cursor-pointer">
-                  <span className="text-[#7A1C2E]">›</span> Community Guidelines
+                  <span className="text-[var(--accent-primary)]">›</span> Community Guidelines
                 </span>
               </li>
             </ul>

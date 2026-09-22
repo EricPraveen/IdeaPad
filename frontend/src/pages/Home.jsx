@@ -143,7 +143,7 @@ export default function Home() {
       {/* ─── NEWS TICKER ───────────────────────────────────── */}
       <div className="bg-[#141311] text-[#FAF6EE] py-2 px-4 sm:px-8 overflow-hidden border-b border-[#282521]">
         <div className="max-w-7xl mx-auto flex items-center">
-          <span className="shrink-0 bg-[#7A1C2E] text-[#FAF6EE] px-2.5 py-0.5 text-[9px] uppercase font-mono tracking-widest rounded-xs mr-4 font-bold">
+          <span className="shrink-0 bg-[var(--accent-primary)] text-[var(--text-on-accent)] px-2.5 py-0.5 text-[9px] uppercase font-mono tracking-widest rounded-xs mr-4 font-bold">
             LATEST
           </span>
           <div className="overflow-hidden flex-1">
@@ -193,7 +193,7 @@ export default function Home() {
         {heroStory && (
           <section className="fade-in">
             <div className="flex items-center justify-between pb-2 border-b border-[#DDD2C1] mb-4">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7A1C2E] font-semibold">
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--accent-primary)] font-semibold">
                 FEATURED ARTICLE
               </span>
               <span className="text-[10px] font-mono text-[#8E857B]">
@@ -210,7 +210,7 @@ export default function Home() {
           {/* Curated Stories Column */}
           <div className="lg:col-span-7 space-y-6">
             <div className="flex items-center justify-between pb-2 border-b border-[#DDD2C1]">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7A1C2E] font-semibold">
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--accent-primary)] font-semibold">
                 CURATED STORIES
               </span>
               <span className="text-[10px] font-mono text-[#8E857B]">RECOMMENDED</span>
@@ -232,7 +232,7 @@ export default function Home() {
           {/* Most Popular (01, 02, 03, 04) */}
           <div className="lg:col-span-5 lg:border-l lg:border-[#DDD2C1] lg:pl-8 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-[#DDD2C1]">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7A1C2E] font-semibold">
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--accent-primary)] font-semibold">
                 MOST POPULAR
               </span>
               <span className="text-[10px] font-mono text-[#A67C48]">TOP READS</span>
@@ -246,7 +246,7 @@ export default function Home() {
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-mono uppercase text-[#7A1C2E]">
+                      <span className="text-[10px] font-mono uppercase text-[var(--accent-primary)]">
                         {post.genre || 'General'}
                       </span>
                       <span className="text-[10px] font-mono text-[#8E857B]">
@@ -254,7 +254,7 @@ export default function Home() {
                       </span>
                     </div>
                     <Link to={`/post/${post.id}`}>
-                      <h4 className="font-serif font-bold text-sm text-[#161412] group-hover:text-[#7A1C2E] transition-colors leading-snug line-clamp-2">
+                      <h4 className="font-serif font-bold text-sm text-[#161412] group-hover:text-[var(--accent-primary)] transition-colors leading-snug line-clamp-2">
                         {post.title}
                       </h4>
                     </Link>
@@ -272,7 +272,7 @@ export default function Home() {
         {/* ─── 3. EXPLORE BY CATEGORY ────────────────────────── */}
         <section>
           <div className="flex items-center justify-between pb-2 border-b border-[#DDD2C1] mb-5">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7A1C2E] font-semibold">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--accent-primary)] font-semibold">
               EXPLORE BY CATEGORY
             </span>
             <span className="text-[10px] font-mono text-[#8E857B]">
@@ -289,7 +289,7 @@ export default function Home() {
               >
                 <div>
                   <span className="text-xl block mb-2">{cat.icon}</span>
-                  <h4 className="font-serif font-bold text-sm text-[#161412] group-hover:text-[#7A1C2E] transition-colors">
+                  <h4 className="font-serif font-bold text-sm text-[#161412] group-hover:text-[var(--accent-primary)] transition-colors">
                     {cat.name}
                   </h4>
                 </div>
@@ -304,7 +304,7 @@ export default function Home() {
         {/* ─── 4. LATEST ARTICLES ────────────────────────────── */}
         <section>
           <div className="flex items-center justify-between flex-wrap gap-4 mb-4 pb-2 border-b border-[#DDD2C1]">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7A1C2E] font-semibold">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--accent-primary)] font-semibold">
               {selectedGenre === 'All' ? 'LATEST ARTICLES' : `${selectedGenre.toUpperCase()} ARTICLES`}
             </span>
             <span className="text-xs font-mono text-[#8E857B]">
@@ -352,7 +352,7 @@ export default function Home() {
         {/* ─── 5. WRITERS & AUTHORS ──────────────────────────── */}
         <section id="authors-section" className="pt-4 border-t border-[#DDD2C1]">
           <div className="flex items-center justify-between pb-2 border-b border-[#DDD2C1] mb-5">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7A1C2E] font-semibold">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--accent-primary)] font-semibold">
               FEATURED AUTHORS &amp; WRITERS
             </span>
             <span className="text-[10px] font-mono text-[#8E857B]">COMMUNITY</span>
@@ -366,10 +366,10 @@ export default function Home() {
                   to={`/user/${author.id}`}
                   className="p-4 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-center group hover:border-[#7A1C2E] transition-all"
                 >
-                  <div className="w-11 h-11 rounded-xs bg-[#EFE8DC] border border-[#DDD2C1] flex items-center justify-center font-serif font-bold text-base text-[#7A1C2E] mx-auto mb-2.5 group-hover:scale-105 transition-transform">
+                  <div className="w-11 h-11 rounded-xs bg-[#EFE8DC] border border-[#DDD2C1] flex items-center justify-center font-serif font-bold text-base text-[var(--accent-primary)] mx-auto mb-2.5 group-hover:scale-105 transition-transform">
                     {author.name.charAt(0).toUpperCase()}
                   </div>
-                  <h4 className="font-serif font-bold text-sm text-[#161412] group-hover:text-[#7A1C2E] transition-colors truncate">
+                  <h4 className="font-serif font-bold text-sm text-[#161412] group-hover:text-[var(--accent-primary)] transition-colors truncate">
                     {author.name}
                   </h4>
                   <p className="text-[10px] font-mono text-[#8E857B] mt-0.5">
@@ -388,7 +388,7 @@ export default function Home() {
         {/* ─── 6. QUOTE OF THE DAY ───────────────────────────── */}
         <section className="my-10 py-8 px-6 bg-[#FAF6EE] text-center border border-[#DDD2C1] rounded-xs relative">
           <div className="max-w-2xl mx-auto">
-            <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#7A1C2E] block mb-2 font-semibold">
+            <span className="text-[10px] font-mono uppercase tracking-[0.24em] text-[var(--accent-primary)] block mb-2 font-semibold">
               QUOTE OF THE DAY
             </span>
             <blockquote className="font-serif italic text-lg sm:text-2xl text-[#161412] leading-relaxed mb-3">

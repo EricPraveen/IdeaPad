@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTheme } from '../context/ThemeContext'
 
 export default function CustomCursor() {
   const canvasRef = useRef(null)
@@ -7,6 +8,12 @@ export default function CustomCursor() {
   const [isHovered, setIsHovered] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const { isDark } = useTheme()
+
+  const isDarkRef = useRef(isDark)
+  useEffect(() => {
+    isDarkRef.current = isDark
+  }, [isDark])
 
   useEffect(() => {
     // Check if device is a touchscreen / coarse pointer
@@ -60,42 +67,47 @@ export default function CustomCursor() {
         lastX = mouseX
         lastY = mouseY
         isFirstMove = false
-        setIsVisible(true)
       }
 
-      // Add point to blue ink trail if pen has moved at least 2px
+      // Record point for ink calligraphy ribbon
       const dist = Math.hypot(mouseX - lastX, mouseY - lastY)
-      if (dist > 2) {
+      if (dist > 3) {
         trail.push({
           x: mouseX,
           y: mouseY,
-          age: 1.0 // opacity factor (1.0 down to 0)
+          age: 1.0
         })
         lastX = mouseX
         lastY = mouseY
+
+        if (trail.length > 28) {
+          trail.shift()
+        }
       }
 
-      if (penRef.current) {
-        // Pen tip is anchored directly at (mouseX, mouseY)
-        penRef.current.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`
-      }
+      if (!isVisible) setIsVisible(true)
     }
 
+    // Animation Loop
     const animate = () => {
-      // 1. Smooth trailing ring physics (always lags behind cursor)
-      const lag = 0.16
-      ringX += (mouseX - ringX) * lag
-      ringY += (mouseY - ringY) * lag
+      // 1. Move the nib immediately
+      if (penRef.current) {
+        penRef.current.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`
+      }
+
+      // 2. Trailing ring follows with smooth spring lag
+      const ease = 0.22
+      ringX += (mouseX - ringX) * ease
+      ringY += (mouseY - ringY) * ease
 
       if (ringRef.current) {
         ringRef.current.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`
       }
 
-      // 2. Draw Blue Ink Stripe / Trail on Canvas
-      if (ctx && canvas) {
+      // 3. Render organic ink trail on canvas
+      if (ctx) {
         ctx.clearRect(0, 0, width, height)
 
-        // Age points and remove decayed ones
         for (let i = 0; i < trail.length; i++) {
           trail[i].age -= 0.038 // fades out smoothly in ~26 frames (~450ms)
         }
@@ -103,8 +115,9 @@ export default function CustomCursor() {
           trail.shift()
         }
 
-        // Draw organic, tapered blue ink ribbon
+        // Draw organic, tapered ink ribbon
         if (trail.length > 1) {
+          const dark = isDarkRef.current
           for (let i = 0; i < trail.length - 1; i++) {
             const p1 = trail[i]
             const p2 = trail[i + 1]
@@ -123,8 +136,10 @@ export default function CustomCursor() {
             ctx.lineWidth = strokeW
             ctx.lineCap = 'round'
             ctx.lineJoin = 'round'
-            // Royal editorial blue ink color
-            ctx.strokeStyle = `rgba(37, 99, 235, ${opacity})`
+            // Antique gold ink in dark mode, royal blue ink in light mode
+            ctx.strokeStyle = dark
+              ? `rgba(201, 162, 39, ${opacity})`
+              : `rgba(37, 99, 235, ${opacity})`
             ctx.stroke()
           }
         }
@@ -193,7 +208,7 @@ export default function CustomCursor() {
         isVisible ? 'opacity-100' : 'opacity-0'
       } hidden md:block`}
     >
-      {/* ─── Blue Ink Stripe Canvas Layer ─── */}
+      {/* ─── Ink Stripe Canvas Layer ─── */}
       <canvas
         ref={canvasRef}
         className="fixed inset-0 pointer-events-none z-[99998]"
@@ -210,7 +225,13 @@ export default function CustomCursor() {
       >
         <div
           className={`rounded-full transition-[width,height,background-color,border-color,opacity,transform] duration-200 ease-out -translate-x-1/2 -translate-y-1/2 ${
-            isHovered
+            isDark
+              ? isHovered
+                ? 'w-12 h-12 border-2 border-[#C9A227] bg-[#C9A227]/15 shadow-sm shadow-[#C9A227]/20'
+                : isClicked
+                ? 'w-7 h-7 border border-[#C9A227] bg-[#C9A227]/30'
+                : 'w-8 h-8 border border-[#C9A227]/40 bg-[#C9A227]/5'
+              : isHovered
               ? 'w-12 h-12 border-2 border-[#2563EB] bg-[#2563EB]/10 shadow-sm'
               : isClicked
               ? 'w-7 h-7 border border-[#2563EB] bg-[#2563EB]/25'
@@ -232,7 +253,6 @@ export default function CustomCursor() {
             isHovered ? 'scale-115 -rotate-6' : isClicked ? 'scale-90 translate-y-0.5' : 'scale-100'
           }`}
           style={{
-            // Pen nib tip is positioned precisely at (0, 0)
             marginLeft: '-2px',
             marginTop: '-2px'
           }}
@@ -241,15 +261,15 @@ export default function CustomCursor() {
             width="26"
             height="26"
             viewBox="0 0 24 24"
-            className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)]"
+            className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             {/* Pen Nib Body */}
             <path
               d="M18 13L16.5 5.5L2 2L5.5 16.5L13 18L18 13Z"
-              fill="#FAF6EE"
-              stroke="#161412"
+              fill={isDark ? '#232323' : '#FAF6EE'}
+              stroke={isDark ? '#C9A227' : '#161412'}
               strokeWidth="1.6"
               strokeLinejoin="round"
             />
@@ -257,43 +277,43 @@ export default function CustomCursor() {
             {/* Golden / Brass Shoulder Accent */}
             <path
               d="M16.5 5.5L18 13L13 18"
-              fill="#C5A059"
-              fillOpacity="0.4"
+              fill={isDark ? '#B87333' : '#C5A059'}
+              fillOpacity={isDark ? 0.6 : 0.4}
             />
 
-            {/* Pen Nib Slit - Royal Blue Ink */}
+            {/* Pen Nib Slit - Gold in Dark, Blue in Light */}
             <path
               d="M2 2L9.5 9.5"
-              stroke="#2563EB"
+              stroke={isDark ? '#C9A227' : '#2563EB'}
               strokeWidth="1.6"
               strokeLinecap="round"
             />
 
-            {/* Breather Hole (Blue Inked circle) */}
+            {/* Breather Hole */}
             <circle
               cx="10.5"
               cy="10.5"
               r="1.6"
-              fill="#2563EB"
-              stroke="#161412"
+              fill={isDark ? '#C9A227' : '#2563EB'}
+              stroke={isDark ? '#B87333' : '#161412'}
               strokeWidth="0.8"
             />
 
             {/* Pen Handle / Barrel */}
             <path
               d="M12.5 18.5L19 12L22 15L15.5 21.5L12.5 18.5Z"
-              fill="#161412"
-              stroke="#161412"
+              fill={isDark ? '#161616' : '#161412'}
+              stroke={isDark ? '#333333' : '#161412'}
               strokeWidth="1.2"
               strokeLinejoin="round"
             />
 
-            {/* Fresh Blue Ink Bead at the absolute tip */}
+            {/* Fresh Ink Bead at the absolute tip */}
             <circle
               cx="2.5"
               cy="2.5"
               r="1.4"
-              fill="#2563EB"
+              fill={isDark ? '#C9A227' : '#2563EB'}
             />
           </svg>
         </div>

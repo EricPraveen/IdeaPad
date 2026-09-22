@@ -16,8 +16,8 @@ const ToolbarBtn = ({ onClick, active, title, children }) => (
     title={title}
     className={`px-2.5 py-1 text-xs font-mono rounded-xs transition-all cursor-pointer border ${
       active
-        ? 'bg-[#7A1C2E] text-[#FAF6EE] border-[#581220] font-bold'
-        : 'bg-[#FAF6EE] text-[#35312C] border-[#DDD2C1] hover:bg-[#EFE8DC] hover:text-[#7A1C2E]'
+        ? 'bg-[var(--accent-primary)] text-[var(--text-on-accent)] border-[var(--border-focus)] font-bold'
+        : 'bg-[#FAF6EE] text-[#35312C] border-[#DDD2C1] hover:bg-[#EFE8DC] hover:text-[var(--accent-primary)]'
     }`}
   >
     {children}
@@ -51,7 +51,7 @@ export default function WritePost() {
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose max-w-none focus:outline-none min-h-[420px] leading-relaxed font-body text-[#221F1C] vintage-prose'
+        class: 'prose max-w-none focus:outline-none min-h-[420px] leading-relaxed font-body text-[var(--text-primary)] vintage-prose'
       }
     }
   })

@@ -255,21 +255,21 @@ export default function PostDetail() {
               <span className="text-[10px] mr-1">TYPE:</span>
               <button
                 onClick={() => setFontSizeLevel(0)}
-                className={`px-1.5 py-0.5 rounded-xs cursor-pointer ${fontSizeLevel === 0 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
+                className={`px-1.5 py-0.5 rounded-xs cursor-pointer ${fontSizeLevel === 0 ? 'bg-[var(--accent-primary)] text-[var(--text-on-accent)]' : 'hover:text-[var(--accent-primary)]'}`}
                 title="Normal text"
               >
                 A
               </button>
               <button
                 onClick={() => setFontSizeLevel(1)}
-                className={`px-1.5 py-0.5 rounded-xs text-sm cursor-pointer ${fontSizeLevel === 1 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
+                className={`px-1.5 py-0.5 rounded-xs text-sm cursor-pointer ${fontSizeLevel === 1 ? 'bg-[var(--accent-primary)] text-[var(--text-on-accent)]' : 'hover:text-[var(--accent-primary)]'}`}
                 title="Comfortable text"
               >
                 A+
               </button>
               <button
                 onClick={() => setFontSizeLevel(2)}
-                className={`px-1.5 py-0.5 rounded-xs text-base cursor-pointer ${fontSizeLevel === 2 ? 'bg-[#7A1C2E] text-[#FAF6EE]' : 'hover:text-[#7A1C2E]'}`}
+                className={`px-1.5 py-0.5 rounded-xs text-base cursor-pointer ${fontSizeLevel === 2 ? 'bg-[var(--accent-primary)] text-[var(--text-on-accent)]' : 'hover:text-[var(--accent-primary)]'}`}
                 title="Large text"
               >
                 A++
@@ -409,7 +409,7 @@ export default function PostDetail() {
                 onClick={handleLike}
                 className={`w-full py-2 px-3 rounded-xs flex items-center justify-center gap-2 text-xs font-mono transition-all cursor-pointer border ${
                   liked
-                    ? 'bg-[#7A1C2E] text-[#FAF6EE] border-[#581220]'
+                    ? 'bg-[var(--accent-primary)] text-[var(--text-on-accent)] border-[var(--border-focus)]'
                     : 'bg-[#EFE8DC] text-[#161412] border-[#DDD2C1] hover:bg-[#E2D6C3]'
                 }`}
                 title="Like article"
@@ -423,7 +423,7 @@ export default function PostDetail() {
                 onClick={handleBookmark}
                 className={`w-full py-2 px-3 rounded-xs flex items-center justify-center gap-2 text-xs font-mono transition-all cursor-pointer border ${
                   bookmarked
-                    ? 'bg-[#A67C48] text-[#FAF6EE] border-[#8C6433]'
+                    ? 'bg-[var(--accent-secondary)] text-[var(--text-on-accent)] border-[var(--accent-secondary)]'
                     : 'bg-[#EFE8DC] text-[#161412] border-[#DDD2C1] hover:bg-[#E2D6C3]'
                 }`}
                 title="Save bookmark"
