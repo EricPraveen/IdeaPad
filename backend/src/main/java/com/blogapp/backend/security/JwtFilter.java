@@ -1,4 +1,4 @@
-package com.blogapp.backend.config;
+package com.blogapp.backend.security;
 
 import java.io.IOException;
 import java.util.List;

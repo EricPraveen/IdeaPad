@@ -1,4 +1,4 @@
-package com.blogapp.backend.config;
+package com.blogapp.backend.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
