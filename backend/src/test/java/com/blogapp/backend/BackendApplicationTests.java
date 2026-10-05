@@ -10,7 +10,7 @@ class BackendApplicationTests {
 	static {
 		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 		if (dotenv.get("DB_URL") == null) {
-			dotenv = Dotenv.configure().directory("./backend/backend").ignoreIfMissing().load();
+			dotenv = Dotenv.configure().directory("./backend").ignoreIfMissing().load();
 		}
 		dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
 	}
