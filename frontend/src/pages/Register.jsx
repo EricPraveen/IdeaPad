@@ -45,26 +45,26 @@ export default function Register() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-12">
-      <div className="paper-card p-6 sm:p-10 bg-[#FAF6EE] border-2 border-[#DDD2C1] shadow-xl text-center">
+    <div className="max-w-xl mx-auto px-4 py-14">
+      <div className="p-7 sm:p-10 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs shadow-xs text-center">
         
-        {/* Wax Seal Stamp */}
-        <div className="w-14 h-14 mx-auto rounded-full bg-[#7A1C2E] text-[#FAF6EE] font-serif font-black text-2xl flex items-center justify-center mb-3 shadow-md">
+        {/* Editorial Press Stamp */}
+        <div className="w-12 h-12 mx-auto rounded-xs bg-[#7A1C2E] text-[#FAF6EE] font-serif font-black text-xl flex items-center justify-center mb-3 shadow-xs">
           I
         </div>
 
-        <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C5A059] mb-1">
-          SUBSCRIBE TO THE GUILD
+        <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-[#A67C48] mb-1 font-semibold">
+          CREATE AN ACCOUNT
         </div>
-        <h1 className="font-serif font-black text-2xl sm:text-3xl text-[#1A1A1A]">
-          Correspondent Enrollment
+        <h1 className="font-serif font-black text-2xl sm:text-3xl text-[#161412]">
+          Join IDEAPAD
         </h1>
-        <p className="font-body italic text-xs text-[#6B6358] mt-1 mb-6">
-          Claim your official byline and publish dispatches to readers across the globe.
+        <p className="font-body italic text-xs text-[#5C554D] mt-1 mb-6">
+          Create an account to write, publish, and bookmark stories.
         </p>
 
         {error && (
-          <div className="p-3 mb-5 rounded bg-[#FDF0F0] border border-[#7A1C2E] text-[#7A1C2E] text-xs font-mono text-left">
+          <div className="p-3 mb-5 rounded-xs bg-[#FAF0F0] border border-[#7A1C2E] text-[#7A1C2E] text-xs font-mono text-left">
             ⚠ {error}
           </div>
         )}
@@ -73,52 +73,60 @@ export default function Register() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="byline block mb-1">Full Legal Name</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D] block mb-1">
+                Full Name
+              </label>
               <input
                 type="text"
                 name="name"
                 value={form.name}
                 onChange={handleChange}
                 required
-                placeholder="Arthur Conan Doyle"
-                className="ink-input w-full text-sm"
+                placeholder="Jane Doe"
+                className="w-full px-3 py-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs sm:text-sm font-body text-[#161412] focus:outline-none focus:border-[#7A1C2E]"
               />
             </div>
 
             <div>
-              <label className="byline block mb-1">Author Handle / Username</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D] block mb-1">
+                Username
+              </label>
               <input
                 type="text"
                 name="username"
                 value={form.username}
                 onChange={handleChange}
                 required
-                placeholder="arthur_doyle"
-                className="ink-input w-full text-sm"
+                placeholder="janedoe"
+                className="w-full px-3 py-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs sm:text-sm font-mono text-[#161412] focus:outline-none focus:border-[#7A1C2E]"
               />
             </div>
           </div>
 
           <div>
-            <label className="byline block mb-1">Official Email Address</label>
+            <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D] block mb-1">
+              Email Address
+            </label>
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
               required
-              placeholder="arthur@bakerstreet.co.uk"
-              className="ink-input w-full text-sm"
+              placeholder="jane@example.com"
+              className="w-full px-3 py-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs sm:text-sm font-body text-[#161412] focus:outline-none focus:border-[#7A1C2E]"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="byline">Password (Min 6 Characters)</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D]">
+                Password
+              </label>
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-[11px] font-mono text-[#8F8679] hover:text-[#7A1C2E]"
+                className="text-[10px] font-mono text-[#8E857B] hover:text-[#7A1C2E] cursor-pointer"
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -129,38 +137,41 @@ export default function Register() {
               value={form.password}
               onChange={handleChange}
               required
-              minLength={6}
               placeholder="••••••••••••"
-              className="ink-input w-full text-sm"
+              className="w-full px-3 py-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs sm:text-sm font-mono text-[#161412] focus:outline-none focus:border-[#7A1C2E]"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="byline block mb-1">Gender</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D] block mb-1">
+                Gender
+              </label>
               <select
                 name="gender"
                 value={form.gender}
                 onChange={handleChange}
-                className="w-full p-2.5 bg-[#FAF6EE] border border-[#DDD2C1] rounded font-mono text-xs text-[#1A1A1A] focus:outline-none focus:border-[#7A1C2E]"
+                className="w-full px-3 py-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs font-mono text-[#161412] focus:outline-none focus:border-[#7A1C2E] cursor-pointer"
               >
-                <option value="">Select</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-                <option value="Prefer not to say">Unstated</option>
+                <option value="">Select gender...</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Non-binary / Other</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
               </select>
             </div>
 
             <div>
-              <label className="byline block mb-1">Bureau Country</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D] block mb-1">
+                Country
+              </label>
               <select
                 name="country"
                 value={form.country}
                 onChange={handleChange}
-                className="w-full p-2.5 bg-[#FAF6EE] border border-[#DDD2C1] rounded font-mono text-xs text-[#1A1A1A] focus:outline-none focus:border-[#7A1C2E]"
+                className="w-full px-3 py-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs font-mono text-[#161412] focus:outline-none focus:border-[#7A1C2E] cursor-pointer"
               >
-                <option value="">Select</option>
+                <option value="">Select country...</option>
                 {countries.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -168,33 +179,34 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="byline block mb-1">Date of Birth</label>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[#6E665D] block mb-1">
+                Date of Birth
+              </label>
               <input
                 type="date"
                 name="dateOfBirth"
                 value={form.dateOfBirth}
                 onChange={handleChange}
-                className="w-full p-2 bg-[#FAF6EE] border border-[#DDD2C1] rounded font-mono text-xs text-[#1A1A1A] focus:outline-none focus:border-[#7A1C2E]"
+                className="w-full px-3 py-1.5 bg-[#FAF6EE] border border-[#DDD2C1] rounded-xs text-xs font-mono text-[#161412] focus:outline-none focus:border-[#7A1C2E]"
               />
             </div>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-3">
             <button
               type="submit"
               disabled={loading}
-              className="stamp-btn w-full py-2.5 text-xs tracking-widest"
+              className="editorial-btn-primary w-full py-2.5 text-xs tracking-widest"
             >
-              {loading ? 'Issuing Pass…' : 'Enroll in the Gazette'}
+              {loading ? 'Creating Account…' : 'Create Account'}
             </button>
           </div>
-
         </form>
 
-        <div className="mt-6 pt-5 border-t border-[#DDD2C1] text-xs font-mono text-[#6B6358]">
-          Already have credentials?{' '}
+        <div className="mt-6 pt-5 border-t border-[#DDD2C1] text-xs font-mono text-[#6E665D]">
+          Already have an account?{' '}
           <Link to="/login" className="text-[#7A1C2E] hover:underline font-bold">
-            Sign In to Study →
+            Sign In →
           </Link>
         </div>
 
